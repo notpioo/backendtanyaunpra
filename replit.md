@@ -4,14 +4,17 @@
 A Python Flask backend system for an academic virtual assistant chatbot with dark-themed admin panel. This system provides REST API endpoints for Flutter app integration, NLP processing using Google Gemini AI, and comprehensive knowledge base management.
 
 ## Recent Changes
-- **2025-11-11**: Railway deployment configuration added
-  - Created `wsgi.py` as production WSGI entry point
+- **2025-11-11**: Railway deployment configuration and import fixes
+  - Renamed `app.py` to `application.py` to avoid import conflicts
+  - Updated `wsgi.py` to import from `application.py`
   - Added `railway.json` with optimal gunicorn configuration
   - Created `Procfile` for platform compatibility
   - Added `gunicorn_config.py` for production optimization
   - Fixed "ModuleNotFoundError: No module named 'main'" crash
+  - Fixed "ImportError: cannot import name 'create_app'" by renaming root file
   - Added comprehensive deployment documentation in `DEPLOYMENT.md`
   - Created `.gitignore` for Python projects
+  - Updated workflow to use `application.py`
 
 - **2025-09-15**: Complete implementation of chatbot backend system
   - Flask backend with organized folder structure
@@ -29,8 +32,8 @@ A Python Flask backend system for an academic virtual assistant chatbot with dar
   - `/app/config/`: Configuration (Firebase mock/real setup)
   - `/app/templates/`: Admin panel HTML templates
   - `/app/static/`: CSS/JS assets for dark theme
+  - `application.py`: Main Flask app factory and configuration (renamed from app.py)
   - `wsgi.py`: Production WSGI entry point for deployment
-  - `app.py`: Application factory and Flask configuration
 
 - **Deployment**: Production-ready configuration
   - `railway.json`: Railway platform configuration

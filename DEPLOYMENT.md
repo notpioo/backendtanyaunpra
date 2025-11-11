@@ -45,10 +45,19 @@ FIREBASE_CLIENT_EMAIL=your_client_email
 
 ### Configuration Files
 
-- **`wsgi.py`** - WSGI entry point for production
+- **`application.py`** - Main Flask application with create_app() factory
+- **`wsgi.py`** - WSGI entry point for production (imports from application.py)
 - **`railway.json`** - Railway-specific configuration
 - **`Procfile`** - Alternative deployment configuration
 - **`gunicorn_config.py`** - Production server settings
+
+### Important Note About File Structure
+
+The project has:
+- **`application.py`** (root level) - Contains the Flask app factory `create_app()`
+- **`app/`** (directory) - Contains routes, services, templates, etc.
+
+This naming convention avoids import conflicts in production environments.
 
 ### Troubleshooting
 

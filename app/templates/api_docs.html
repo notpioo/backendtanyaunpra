@@ -10,8 +10,8 @@
     
     <!-- Base URL Information -->
     <div style="margin-bottom: 30px; padding: 20px; background-color: #1a202c; border-radius: 8px; border-left: 4px solid #3182ce;">
-        <h3 style="color: #68d391; margin-bottom: 10px;">🌐 Base URL</h3>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace; margin: 10px 0; font-size: 16px;">
+        <h3 style="color: #3182ce; margin-bottom: 10px;">🌐 Base URL</h3>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0; font-size: 16px;">
             <span id="base-url">Loading...</span>
         </div>
         <p class="announcement-content" style="margin-top: 10px; color: #a0aec0;">
@@ -23,15 +23,15 @@
         <h3 style="color: #3182ce; margin-bottom: 10px;">📤 POST /api/chat/message</h3>
         <p class="announcement-content">Send a message to the chatbot and get AI response.</p>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace; margin: 10px 0;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
 {
   "message": "Apa itu sistem kredit semester?"
 }
         </div>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
 {
   "success": true,
   "response": "Sistem Kredit Semester (SKS) adalah...",
@@ -44,8 +44,8 @@
         <h3 style="color: #3182ce; margin-bottom: 10px;">📋 GET /api/knowledge/</h3>
         <p class="announcement-content">Get all knowledge entries from database.</p>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
 {
   "success": true,
   "data": [...],
@@ -58,8 +58,8 @@
         <h3 style="color: #3182ce; margin-bottom: 10px;">➕ POST /api/knowledge/</h3>
         <p class="announcement-content">Add new knowledge entry to database.</p>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace; margin: 10px 0;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
 {
   "question": "Apa itu KRS?",
   "answer": "KRS adalah Kartu Rencana Studi...",
@@ -73,8 +73,8 @@
         <h3 style="color: #3182ce; margin-bottom: 10px;">✏️ PUT /api/knowledge/&lt;id&gt;</h3>
         <p class="announcement-content">Update existing knowledge entry.</p>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace; margin: 10px 0;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
 {
   "question": "Updated question",
   "answer": "Updated answer",
@@ -93,8 +93,8 @@
         <h3 style="color: #3182ce; margin-bottom: 10px;">📢 GET /api/announcement/</h3>
         <p class="announcement-content">Get current announcement data.</p>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
 {
   "success": true,
   "data": {
@@ -110,8 +110,8 @@
         <h3 style="color: #3182ce; margin-bottom: 10px;">🔄 POST /api/announcement/</h3>
         <p class="announcement-content">Update announcement data.</p>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace; margin: 10px 0;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
 {
   "title": "New Announcement",
   "message": "This is the new announcement message"
@@ -123,8 +123,8 @@
         <h3 style="color: #3182ce; margin-bottom: 10px;">❤️ GET /api/chat/health</h3>
         <p class="announcement-content">Check API health status.</p>
         
-        <h4 style="color: #68d391; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #68d391; font-family: monospace;">
+        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
+        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
 {
   "status": "online",
   "service": "chatbot-api",
@@ -167,11 +167,11 @@ document.addEventListener('DOMContentLoaded', function() {
         navigator.clipboard.writeText(baseUrl).then(function() {
             const originalText = baseUrlElement.textContent;
             baseUrlElement.textContent = 'Copied!';
-            baseUrlElement.style.color = '#68d391';
+            baseUrlElement.style.color = '#3182ce';
             
             setTimeout(function() {
                 baseUrlElement.textContent = originalText;
-                baseUrlElement.style.color = '#68d391';
+                baseUrlElement.style.color = '#3182ce';
             }, 1000);
         });
     });

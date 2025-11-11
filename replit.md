@@ -4,17 +4,25 @@
 A Python Flask backend system for an academic virtual assistant chatbot with dark-themed admin panel. This system provides REST API endpoints for Flutter app integration, NLP processing using Google Gemini AI, and comprehensive knowledge base management.
 
 ## Recent Changes
-- **2025-11-11**: Railway deployment configuration and import fixes
-  - Renamed `app.py` to `application.py` to avoid import conflicts
-  - Updated `wsgi.py` to import from `application.py`
-  - Added `railway.json` with optimal gunicorn configuration
-  - Created `Procfile` for platform compatibility
-  - Added `gunicorn_config.py` for production optimization
-  - Fixed "ModuleNotFoundError: No module named 'main'" crash
-  - Fixed "ImportError: cannot import name 'create_app'" by renaming root file
-  - Added comprehensive deployment documentation in `DEPLOYMENT.md`
-  - Created `.gitignore` for Python projects
-  - Updated workflow to use `application.py`
+- **2025-11-11**: Enhanced Navigation System & Railway deployment fixes
+  - **Navigation Improvements:**
+    - Added collapsible sidebar with smooth animations for desktop
+    - Icon-only mode when collapsed with tooltips on hover
+    - LocalStorage persistence - remembers collapse state
+    - Improved mobile menu with smooth slide animations
+    - Keyboard shortcuts: `Ctrl/Cmd + B` to toggle sidebar (desktop)
+    - Responsive design works perfectly on all screen sizes
+    - Better accessibility with ARIA labels
+    - Created `navigation.js` with complete navigation logic
+  - **Railway Deployment:**
+    - Renamed `app.py` to `application.py` to avoid import conflicts
+    - Updated `wsgi.py` to import from `application.py`
+    - Added `railway.json` with optimal gunicorn configuration
+    - Created `Procfile` for platform compatibility
+    - Added `gunicorn_config.py` for production optimization
+    - Fixed "ModuleNotFoundError" and "ImportError" crashes
+    - Created comprehensive deployment guides
+    - Created `.gitignore` for Python projects
 
 - **2025-09-15**: Complete implementation of chatbot backend system
   - Flask backend with organized folder structure

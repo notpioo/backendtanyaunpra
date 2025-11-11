@@ -8,60 +8,82 @@
     <link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div class="admin-container">
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="admin-container" id="adminContainer">
         <!-- Sidebar -->
-        <nav class="sidebar">
+        <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h2>Chatbot Admin</h2>
+                <div class="logo-container">
+                    <span class="logo-icon">🤖</span>
+                    <h2 class="logo-text">Chatbot Admin</h2>
+                </div>
+                <!-- Desktop Collapse Toggle -->
+                <button class="sidebar-collapse-btn" id="desktopCollapseBtn" aria-label="Toggle Sidebar" title="Collapse/Expand">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
+            
             <ul class="sidebar-menu">
                 <li>
-                    <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                    <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}" data-tooltip="Dashboard">
                         <i class="fas fa-chart-line"></i>
-                        <span>Dashboard</span>
+                        <span class="menu-text">Dashboard</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('admin.chatbot_testing') }}" class="{% if request.endpoint == 'admin.chatbot_testing' %}active{% endif %}">
+                    <a href="{{ url_for('admin.chatbot_testing') }}" class="{% if request.endpoint == 'admin.chatbot_testing' %}active{% endif %}" data-tooltip="Chatbot Testing">
                         <i class="fas fa-robot"></i>
-                        <span>Chatbot Testing</span>
+                        <span class="menu-text">Chatbot Testing</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('admin.knowledge_management') }}" class="{% if request.endpoint == 'admin.knowledge_management' %}active{% endif %}">
+                    <a href="{{ url_for('admin.knowledge_management') }}" class="{% if request.endpoint == 'admin.knowledge_management' %}active{% endif %}" data-tooltip="Knowledge">
                         <i class="fas fa-book"></i>
-                        <span>Knowledge</span>
+                        <span class="menu-text">Knowledge</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('admin.models') }}" class="{% if request.endpoint == 'admin.models' %}active{% endif %}">
+                    <a href="{{ url_for('admin.models') }}" class="{% if request.endpoint == 'admin.models' %}active{% endif %}" data-tooltip="Models">
                         <i class="fas fa-brain"></i>
-                        <span>Models</span>
+                        <span class="menu-text">Models</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('admin.announcement') }}" class="{% if request.endpoint == 'admin.announcement' %}active{% endif %}">
+                    <a href="{{ url_for('admin.announcement') }}" class="{% if request.endpoint == 'admin.announcement' %}active{% endif %}" data-tooltip="Announcement">
                         <i class="fas fa-bullhorn"></i>
-                        <span>Announcement</span>
+                        <span class="menu-text">Announcement</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('admin.api_docs') }}" class="{% if request.endpoint == 'admin.api_docs' %}active{% endif %}">
+                    <a href="{{ url_for('admin.api_docs') }}" class="{% if request.endpoint == 'admin.api_docs' %}active{% endif %}" data-tooltip="API Docs">
                         <i class="fas fa-code"></i>
-                        <span>API Docs</span>
+                        <span class="menu-text">API Docs</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('admin.settings') }}" class="{% if request.endpoint == 'admin.settings' %}active{% endif %}">
+                    <a href="{{ url_for('admin.settings') }}" class="{% if request.endpoint == 'admin.settings' %}active{% endif %}" data-tooltip="Settings">
                         <i class="fas fa-cog"></i>
-                        <span>Settings</span>
+                        <span class="menu-text">Settings</span>
+                    </a>
+                </li>
+                <li class="menu-divider">
+                    <a href="{{ url_for('admin.logout') }}" class="logout-link" data-tooltip="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="menu-text">Logout</span>
                     </a>
                 </li>
             </ul>
         </nav>
 
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content" id="mainContent">
             <header class="main-header">
                 <h1>{% block page_title %}Dashboard{% endblock %}</h1>
             </header>
@@ -73,6 +95,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

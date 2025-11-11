@@ -28,7 +28,7 @@
     <!-- API Status -->
     <div class="form-group">
         <label>API Status</label>
-        <div class="stat-value" id="api-status" style="color: #68d391;">
+        <div class="stat-value" id="api-status" style="color: #3182ce;">
             <i class="fas fa-circle" style="font-size: 12px;"></i> Connected
         </div>
     </div>
@@ -210,7 +210,7 @@ function updateAPIStatus(isConnected) {
     
     if (isConnected) {
         statusElement.innerHTML = '<i class="fas fa-circle" style="font-size: 12px;"></i> Connected';
-        statusElement.style.color = '#68d391';
+        statusElement.style.color = '#3182ce';
     } else {
         statusElement.innerHTML = '<i class="fas fa-circle" style="font-size: 12px;"></i> Disconnected';
         statusElement.style.color = '#f56565';

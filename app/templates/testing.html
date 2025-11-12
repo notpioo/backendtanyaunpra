@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block title %}Chatbot Testing - Chatbot Admin{% endblock %}
@@ -10,17 +11,22 @@
             <strong>Chatbot:</strong> Halo! Saya adalah asisten virtual akademik kampus. Silakan ajukan pertanyaan seputar akademik, pembelajaran, atau informasi kampus.
         </div>
     </div>
+    
     <div class="chat-input-area">
-        <input type="text" class="form-control chat-input" id="chatInput" placeholder="Ketik pertanyaan Anda di sini...">
+        <input type="text" id="chatInput" class="form-control chat-input" placeholder="Ketik pertanyaan Anda di sini..." onkeypress="handleKeyPress(event)">
         <button class="btn btn-primary" onclick="sendMessage()">
-            <i class="fas fa-paper-plane"></i>
+            <i class="fas fa-paper-plane"></i> Send
         </button>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
 function sendMessage() {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
@@ -28,53 +34,53 @@ function sendMessage() {
     if (!message) return;
     
     // Add user message to chat
-    addMessageToChat('user', message);
+    addMessage('user', message);
     input.value = '';
     
-    // Add loading message
-    const loadingDiv = addMessageToChat('bot', '<div class="loading"></div> Sedang memproses...');
+    // Show loading
+    const loadingId = addMessage('bot', '<span class="loading"></span> Mengetik...');
     
     // Send to API
     fetch('/api/chat/message', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message: message })
     })
     .then(response => response.json())
     .then(data => {
         // Remove loading message
-        loadingDiv.remove();
+        document.getElementById(loadingId).remove();
         
-        // Add bot response
-        addMessageToChat('bot', data.response || 'Maaf, terjadi kesalahan sistem.');
+        if (data.success) {
+            addMessage('bot', data.data.response);
+        } else {
+            addMessage('bot', 'Error: ' + (data.message || 'Terjadi kesalahan'));
+        }
     })
     .catch(error => {
-        loadingDiv.remove();
-        addMessageToChat('bot', 'Maaf, terjadi kesalahan koneksi. Silakan coba lagi.');
+        // Remove loading message
+        document.getElementById(loadingId).remove();
+        addMessage('bot', 'Error: Tidak dapat terhubung ke server');
+        console.error('Error:', error);
     });
 }
 
-function addMessageToChat(sender, message) {
-    const chatMessages = document.getElementById('chatMessages');
+function addMessage(type, content) {
+    const messagesContainer = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
-    messageDiv.className = `chat-message ${sender}`;
+    const messageId = 'msg-' + Date.now();
+    messageDiv.id = messageId;
+    messageDiv.className = 'chat-message ' + type;
     
-    const senderLabel = sender === 'user' ? 'Anda' : 'Chatbot';
-    messageDiv.innerHTML = `<strong>${senderLabel}:</strong> ${message}`;
+    const label = type === 'user' ? 'You' : 'Chatbot';
+    messageDiv.innerHTML = `<strong>${label}:</strong> ${content}`;
     
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
     
-    return messageDiv;
+    return messageId;
 }
-
-// Enter key to send message
-document.getElementById('chatInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        sendMessage();
-    }
-});
 </script>
 {% endblock %}

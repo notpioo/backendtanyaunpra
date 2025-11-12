@@ -8,11 +8,6 @@
     <link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet">
 </head>
 <body>
-    <!-- Mobile Toggle Button -->
-    <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
-        <i class="fas fa-bars"></i>
-    </button>
-
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -20,10 +15,15 @@
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
+                <!-- Mobile Toggle Button - now inside sidebar -->
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Open Navigation" aria-expanded="false" title="Open Navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
                 <div class="logo-container">
-                    <span class="logo-icon">🤖</span>
-                    <h2 class="logo-text">Chatbot Admin</h2>
+                    <h2 class="logo-text">Admin</h2>
                 </div>
+                
                 <!-- Desktop Collapse Toggle -->
                 <button class="sidebar-collapse-btn" id="desktopCollapseBtn" aria-label="Toggle Sidebar" title="Collapse/Expand">
                     <i class="fas fa-chevron-left"></i>
@@ -85,6 +85,10 @@
         <!-- Main Content -->
         <main class="main-content" id="mainContent">
             <header class="main-header">
+                <!-- Mobile Menu Button - Always visible on mobile -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h1>{% block page_title %}Dashboard{% endblock %}</h1>
             </header>
             

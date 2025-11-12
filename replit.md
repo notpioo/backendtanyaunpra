@@ -4,6 +4,21 @@
 A Python Flask backend system for an academic virtual assistant chatbot with dark-themed admin panel. This system provides REST API endpoints for Flutter app integration, NLP processing using Google Gemini AI, and comprehensive knowledge base management.
 
 ## Recent Changes
+- **2025-11-12**: Mobile & Desktop Navigation Fixes
+  - **Mobile Navigation Enhancement:**
+    - Mobile hamburger button now moves with navigation drawer (no longer sticky in place)
+    - Button relocated inside sidebar-header to track drawer position
+    - Transforms into X icon when menu is open with smooth 90deg rotation
+    - Icon dynamically switches between `fa-bars` and `fa-times`
+    - Full accessibility support with `aria-expanded`, `aria-label`, and `title` attributes
+    - All ARIA states stay synchronized across toggle, ESC key, overlay click, and resize events
+    - Professional UX matching modern web design standards
+  - **Desktop Navigation Fix:**
+    - Fixed collapse button being clipped/hidden when sidebar collapsed
+    - Optimized collapsed header layout: reduced padding (12px 8px), vertical flex direction
+    - Collapse button now 40x40px with full opacity for better visibility
+    - Sidebar collapse/expand now works reliably with localStorage persistence
+
 - **2025-11-11**: Enhanced Navigation System & Railway deployment fixes
   - **Navigation Improvements:**
     - Added collapsible sidebar with smooth animations for desktop

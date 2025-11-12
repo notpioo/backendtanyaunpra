@@ -16,6 +16,7 @@
     const adminContainer = document.getElementById('adminContainer');
     const mainContent = document.getElementById('mainContent');
     const mobileToggle = document.getElementById('mobileToggle');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn'); // New button in header
     const desktopCollapseBtn = document.getElementById('desktopCollapseBtn');
     const overlay = document.getElementById('sidebarOverlay');
     
@@ -112,14 +113,31 @@
         if (!isMobile) return;
         
         isMobileMenuOpen = !isMobileMenuOpen;
+        const icon = mobileToggle.querySelector('i');
         
         if (isMobileMenuOpen) {
             sidebar.classList.add('mobile-active');
             overlay.classList.add('active');
+            mobileToggle.classList.add('mobile-toggle--open');
+            if (icon) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            }
+            mobileToggle.setAttribute('aria-label', 'Close Navigation');
+            mobileToggle.setAttribute('aria-expanded', 'true');
+            mobileToggle.setAttribute('title', 'Close Navigation');
             document.body.style.overflow = 'hidden'; // Prevent background scroll
         } else {
             sidebar.classList.remove('mobile-active');
             overlay.classList.remove('active');
+            mobileToggle.classList.remove('mobile-toggle--open');
+            if (icon) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+            mobileToggle.setAttribute('aria-label', 'Open Navigation');
+            mobileToggle.setAttribute('aria-expanded', 'false');
+            mobileToggle.setAttribute('title', 'Open Navigation');
             document.body.style.overflow = '';
         }
     }
@@ -144,6 +162,15 @@
             // Clean up mobile state
             sidebar.classList.remove('mobile-active');
             overlay.classList.remove('active');
+            mobileToggle.classList.remove('mobile-toggle--open');
+            const icon = mobileToggle.querySelector('i');
+            if (icon) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+            mobileToggle.setAttribute('aria-label', 'Open Navigation');
+            mobileToggle.setAttribute('aria-expanded', 'false');
+            mobileToggle.setAttribute('title', 'Open Navigation');
             document.body.style.overflow = '';
             isMobileMenuOpen = false;
             
@@ -172,9 +199,17 @@
             });
         }
         
-        // Mobile toggle button
+        // Mobile toggle button (in sidebar - keep for compatibility)
         if (mobileToggle) {
             mobileToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleMobileMenu();
+            });
+        }
+        
+        // Mobile menu button in main header
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 toggleMobileMenu();
             });

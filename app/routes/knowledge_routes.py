@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
 from app.services.knowledge_service import knowledge_service
+from app.middleware.analytics import track_api_request
 
 knowledge_bp = Blueprint('knowledge', __name__)
 
 @knowledge_bp.route('/', methods=['GET'])
+@track_api_request
 def get_all_knowledge():
     """Get all knowledge entries"""
     try:

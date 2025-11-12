@@ -37,15 +37,21 @@ class GeminiService:
     
     def _initialize_client(self):
         """Initialize or reinitialize the Gemini client"""
-        # Get API key from environment variables (Replit secrets) or .env file
+        # Get API key from .env file (reload to get latest value)
+        from dotenv import load_dotenv
+        load_dotenv(dotenv_path='.env', override=True)
+        
         api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found. Add it to Replit secrets or .env file")
+            raise ValueError("GEMINI_API_KEY not found in .env file")
         self.client = genai.Client(api_key=api_key)
     
     def reload_api_key(self):
-        """Reload API key from environment and reinitialize client"""
+        """Reload API key from .env file and reinitialize client"""
         try:
+            # Force reload .env file to get updated API key
+            from dotenv import load_dotenv
+            load_dotenv(dotenv_path='.env', override=True)
             self._initialize_client()
             return True
         except Exception as e:

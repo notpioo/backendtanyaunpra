@@ -13,59 +13,280 @@
     
     <div class="stat-card">
         <h3>API Response Count</h3>
-        <div class="stat-value">0</div>
+        <div class="stat-value" id="apiResponseCount">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
     </div>
     
     <div class="stat-card">
         <h3>API Status</h3>
-        <div class="stat-value online-status">Online</div>
+        <div class="stat-value" id="apiStatus">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
     </div>
 </div>
 
 <div class="announcement-section">
     <div class="announcement-header">
-        <h2 id="announcementTitle">Announcement</h2>
-        <a href="{{ url_for('admin.announcement') }}" class="btn">View Changes</a>
+        <h2>Latest Announcements</h2>
+        <a href="{{ url_for('admin.announcement') }}" class="btn">View All</a>
     </div>
-    <div class="announcement-content" id="announcementContent">
-        Loading announcement...
+    
+    <div id="announcementContainer">
+        <div style="text-align: center; padding: 40px; color: #a0aec0;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
+            <p>Loading announcements...</p>
+        </div>
     </div>
-    <div id="lastUpdated" style="color: #3182ce; font-size: 0.875rem; margin-top: 10px;"></div>
+    
+    <div id="paginationControls" style="display: none; margin-top: 20px; text-align: center;">
+        <button id="prevBtn" class="btn" onclick="previousPage()" style="margin-right: 10px;">
+            <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <span id="pageInfo" style="color: #a0aec0; margin: 0 15px;">Page 1 of 1</span>
+        <button id="nextBtn" class="btn" onclick="nextPage()">
+            Next <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
 </div>
 
+<style>
+.announcement-card {
+    background-color: #0f1419;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.announcement-card:hover {
+    border-color: #3182ce;
+    transform: translateY(-2px);
+}
+
+.announcement-card h4 {
+    color: #fff;
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.announcement-card p {
+    color: #a0aec0;
+    line-height: 1.6;
+    margin: 0 0 8px 0;
+    white-space: pre-wrap;
+}
+
+.announcement-card .meta {
+    color: #718096;
+    font-size: 0.75rem;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.category-penting {
+    background-color: #e53e3e;
+    color: #fff;
+}
+
+.category-akademik {
+    background-color: #3182ce;
+    color: #fff;
+}
+
+.category-umum {
+    background-color: #718096;
+    color: #fff;
+}
+
+.category-info {
+    background-color: #38b2ac;
+    color: #fff;
+}
+
+.category-peraturan {
+    background-color: #d69e2e;
+    color: #fff;
+}
+
+#paginationControls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+
 <script>
-// Load announcement on page load
+let allAnnouncements = [];
+let currentPage = 1;
+const itemsPerPage = 5;
+
+// Load all data on page load
 document.addEventListener('DOMContentLoaded', function() {
-    loadAnnouncement();
+    loadAnnouncements();
+    loadGlobalStats();
+    checkAPIStatus();
 });
 
-function loadAnnouncement() {
-    fetch('/api/announcement/')
+function loadGlobalStats() {
+    fetch('/api/analytics/stats')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('announcementTitle').textContent = data.data.title;
-                document.getElementById('announcementContent').textContent = data.data.message;
-                
-                if (data.data.updated_at) {
-                    const updatedDate = new Date(data.data.updated_at);
-                    const formattedDate = updatedDate.toLocaleDateString('id-ID', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    document.getElementById('lastUpdated').textContent = `Last updated: ${formattedDate}`;
-                }
+                const totalRequests = data.data.total_requests || 0;
+                document.getElementById('apiResponseCount').textContent = totalRequests.toLocaleString();
             } else {
-                document.getElementById('announcementContent').textContent = "We've updated the chatbot's knowledge base with the latest information. Please review the changes and provide feedback.";
+                document.getElementById('apiResponseCount').textContent = '0';
             }
         })
         .catch(error => {
-            console.error('Error loading announcement:', error);
-            document.getElementById('announcementContent').textContent = "We've updated the chatbot's knowledge base with the latest information. Please review the changes and provide feedback.";
+            console.error('Error loading global stats:', error);
+            document.getElementById('apiResponseCount').textContent = '0';
         });
+}
+
+function checkAPIStatus() {
+    fetch('/api/health')
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('API not responding');
+        })
+        .then(data => {
+            const statusElement = document.getElementById('apiStatus');
+            statusElement.innerHTML = '<i class="fas fa-circle" style="font-size: 12px;"></i> Online';
+            statusElement.style.color = '#48bb78';
+        })
+        .catch(error => {
+            console.error('API Status check failed:', error);
+            const statusElement = document.getElementById('apiStatus');
+            statusElement.innerHTML = '<i class="fas fa-circle" style="font-size: 12px;"></i> Offline';
+            statusElement.style.color = '#e53e3e';
+        });
+}
+
+function loadAnnouncements() {
+    fetch('/api/announcement/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data && data.data.length > 0) {
+                allAnnouncements = data.data;
+                displayPage(1);
+            } else {
+                showEmptyState();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading announcements:', error);
+            showErrorState();
+        });
+}
+
+function displayPage(pageNumber) {
+    const container = document.getElementById('announcementContainer');
+    const totalPages = Math.ceil(allAnnouncements.length / itemsPerPage);
+    
+    if (pageNumber < 1 || pageNumber > totalPages) {
+        return;
+    }
+    
+    currentPage = pageNumber;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageAnnouncements = allAnnouncements.slice(startIndex, endIndex);
+    
+    container.innerHTML = pageAnnouncements.map(announcement => {
+        const createdDate = new Date(announcement.created_at).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const category = announcement.category || 'Umum';
+        const categoryClass = 'category-' + category.toLowerCase();
+        
+        return `
+            <div class="announcement-card">
+                <h4>
+                    <span class="category-badge ${categoryClass}">${escapeHtml(category)}</span>
+                    ${escapeHtml(announcement.title)}
+                </h4>
+                <p>${escapeHtml(announcement.message)}</p>
+                <div class="meta">Dibuat: ${createdDate}</div>
+            </div>
+        `;
+    }).join('');
+    
+    updatePagination(totalPages);
+}
+
+function updatePagination(totalPages) {
+    const paginationControls = document.getElementById('paginationControls');
+    const pageInfo = document.getElementById('pageInfo');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (totalPages > 1) {
+        paginationControls.style.display = 'block';
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+    } else {
+        paginationControls.style.display = 'none';
+    }
+}
+
+function previousPage() {
+    if (currentPage > 1) {
+        displayPage(currentPage - 1);
+    }
+}
+
+function nextPage() {
+    const totalPages = Math.ceil(allAnnouncements.length / itemsPerPage);
+    if (currentPage < totalPages) {
+        displayPage(currentPage + 1);
+    }
+}
+
+function showEmptyState() {
+    const container = document.getElementById('announcementContainer');
+    container.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #a0aec0;">
+            <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <p>Belum ada pengumuman. Klik "View All" untuk membuat pengumuman baru.</p>
+        </div>
+    `;
+    document.getElementById('paginationControls').style.display = 'none';
+}
+
+function showErrorState() {
+    const container = document.getElementById('announcementContainer');
+    container.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #e53e3e;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <p>Gagal memuat pengumuman. Silakan refresh halaman.</p>
+        </div>
+    `;
+    document.getElementById('paginationControls').style.display = 'none';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 </script>
 {% endblock %}

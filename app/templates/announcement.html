@@ -6,43 +6,284 @@
 
 {% block content %}
 <div class="announcement-section">
-    <h2>System Announcements</h2>
-    <form id="announcementForm">
-        <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" class="form-control" id="title" required placeholder="Enter announcement title">
-        </div>
-        <div class="form-group">
-            <label for="message">Message</label>
-            <textarea class="form-control" id="message" required rows="6" placeholder="Enter announcement message"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">
-            <span id="saveButtonText">Update Announcement</span>
-            <span id="saveButtonLoading" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i> Saving...
-            </span>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="margin: 0;">Pengumuman Sistem</h2>
+        <button class="btn btn-primary" onclick="showAddForm()">
+            <i class="fas fa-plus"></i> Buat Pengumuman Baru
         </button>
-    </form>
+    </div>
+
+    <div id="announcementsList" style="margin-bottom: 24px;">
+        <div style="text-align: center; padding: 40px; color: #a0aec0;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
+            <p>Memuat pengumuman...</p>
+        </div>
+    </div>
+
+    <div id="announcementFormContainer" style="display: none;">
+        <div style="background-color: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 24px;">
+            <h3 id="formTitle">Buat Pengumuman Baru</h3>
+            <form id="announcementForm">
+                <input type="hidden" id="editingId" value="">
+                <div class="form-group">
+                    <label for="title">Judul</label>
+                    <input type="text" class="form-control" id="title" required placeholder="Masukkan judul pengumuman">
+                </div>
+                <div class="form-group">
+                    <label for="message">Pesan</label>
+                    <textarea class="form-control" id="message" required rows="6" placeholder="Masukkan isi pengumuman"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="category">Kategori</label>
+                    <select class="form-control" id="category" required>
+                        <option value="Umum">Umum</option>
+                        <option value="Penting">Penting</option>
+                        <option value="Akademik">Akademik</option>
+                        <option value="Info">Info</option>
+                        <option value="Peraturan">Peraturan</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn btn-primary">
+                        <span id="saveButtonText">Simpan Pengumuman</span>
+                        <span id="saveButtonLoading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Menyimpan...
+                        </span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="cancelForm()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
+<style>
+.announcement-card {
+    background-color: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.announcement-card h4 {
+    color: #fff;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
+
+.announcement-card p {
+    color: #a0aec0;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    white-space: pre-wrap;
+}
+
+.announcement-card .meta {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+}
+
+.announcement-card .actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-secondary {
+    background-color: #4a5568;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #2d3748;
+}
+
+.btn-danger {
+    background-color: #e53e3e;
+    color: #fff;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c53030;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.category-penting {
+    background-color: #e53e3e;
+    color: #fff;
+}
+
+.category-akademik {
+    background-color: #3182ce;
+    color: #fff;
+}
+
+.category-umum {
+    background-color: #718096;
+    color: #fff;
+}
+
+.category-info {
+    background-color: #38b2ac;
+    color: #fff;
+}
+
+.category-peraturan {
+    background-color: #d69e2e;
+    color: #fff;
+}
+</style>
+
 <script>
-// Load current announcement on page load
+let currentEditingId = null;
+
 document.addEventListener('DOMContentLoaded', function() {
-    loadCurrentAnnouncement();
+    loadAnnouncements();
 });
 
-function loadCurrentAnnouncement() {
+function loadAnnouncements() {
     fetch('/api/announcement/')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('title').value = data.data.title;
-                document.getElementById('message').value = data.data.message;
+                displayAnnouncements(data.data);
+            } else {
+                showError('Gagal memuat pengumuman');
             }
         })
         .catch(error => {
-            console.error('Error loading announcement:', error);
+            console.error('Error loading announcements:', error);
+            showError('Terjadi kesalahan saat memuat pengumuman');
         });
+}
+
+function displayAnnouncements(announcements) {
+    const container = document.getElementById('announcementsList');
+    
+    if (announcements.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #a0aec0;">
+                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <p>Belum ada pengumuman. Klik "Buat Pengumuman Baru" untuk membuat yang pertama.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = announcements.map(announcement => {
+        const createdDate = new Date(announcement.created_at).toLocaleString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const category = announcement.category || 'Umum';
+        const categoryClass = 'category-' + category.toLowerCase();
+        
+        return `
+            <div class="announcement-card">
+                <div class="category-badge ${categoryClass}">${category}</div>
+                <h4>${escapeHtml(announcement.title)}</h4>
+                <p>${escapeHtml(announcement.message)}</p>
+                <div class="meta">Dibuat: ${createdDate}</div>
+                <div class="actions">
+                    <button class="btn btn-primary btn-sm" onclick="editAnnouncement('${announcement.id}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement('${announcement.id}', '${escapeHtml(announcement.title)}')">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showAddForm() {
+    document.getElementById('formTitle').textContent = 'Buat Pengumuman Baru';
+    document.getElementById('editingId').value = '';
+    document.getElementById('title').value = '';
+    document.getElementById('message').value = '';
+    document.getElementById('category').value = 'Umum';
+    document.getElementById('saveButtonText').textContent = 'Simpan Pengumuman';
+    document.getElementById('announcementFormContainer').style.display = 'block';
+    document.getElementById('title').focus();
+}
+
+function editAnnouncement(id) {
+    fetch(`/api/announcement/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('formTitle').textContent = 'Edit Pengumuman';
+                document.getElementById('editingId').value = id;
+                document.getElementById('title').value = data.data.title;
+                document.getElementById('message').value = data.data.message;
+                document.getElementById('category').value = data.data.category || 'Umum';
+                document.getElementById('saveButtonText').textContent = 'Update Pengumuman';
+                document.getElementById('announcementFormContainer').style.display = 'block';
+                document.getElementById('title').focus();
+            } else {
+                showError('Gagal memuat data pengumuman');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Terjadi kesalahan');
+        });
+}
+
+function cancelForm() {
+    document.getElementById('announcementFormContainer').style.display = 'none';
+    document.getElementById('announcementForm').reset();
+    document.getElementById('editingId').value = '';
+}
+
+function deleteAnnouncement(id, title) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus pengumuman "${title}"?`)) {
+        return;
+    }
+    
+    fetch(`/api/announcement/${id}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess('Pengumuman berhasil dihapus!');
+            loadAnnouncements();
+        } else {
+            showError('Gagal menghapus pengumuman: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError('Terjadi kesalahan');
+    });
 }
 
 function showSaveLoading() {
@@ -63,12 +304,13 @@ function showSuccess(message) {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #3182ce;
+        background: #48bb78;
         color: #fff;
         padding: 15px 20px;
         border-radius: 5px;
         z-index: 10000;
         font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     `;
     notification.textContent = message;
     document.body.appendChild(notification);
@@ -90,6 +332,7 @@ function showError(message) {
         border-radius: 5px;
         z-index: 10000;
         font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     `;
     notification.textContent = message;
     document.body.appendChild(notification);
@@ -104,13 +347,18 @@ document.getElementById('announcementForm').addEventListener('submit', function(
 
     showSaveLoading();
 
+    const editingId = document.getElementById('editingId').value;
     const formData = {
         title: document.getElementById('title').value,
-        message: document.getElementById('message').value
+        message: document.getElementById('message').value,
+        category: document.getElementById('category').value
     };
 
-    fetch('/api/announcement/', {
-        method: 'POST',
+    const url = editingId ? `/api/announcement/${editingId}` : '/api/announcement/';
+    const method = editingId ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
         },
@@ -120,9 +368,12 @@ document.getElementById('announcementForm').addEventListener('submit', function(
     .then(data => {
         resetSaveButton();
         if (data.success) {
-            showSuccess('Announcement berhasil diupdate!');
+            const message = editingId ? 'Pengumuman berhasil diupdate!' : 'Pengumuman berhasil dibuat!';
+            showSuccess(message);
+            cancelForm();
+            loadAnnouncements();
         } else {
-            showError('Gagal mengupdate announcement: ' + data.error);
+            showError('Gagal menyimpan pengumuman: ' + data.error);
         }
     })
     .catch(error => {

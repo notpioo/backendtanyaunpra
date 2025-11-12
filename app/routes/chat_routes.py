@@ -1,10 +1,13 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime
 from app.services.gemini_service import gemini_service
 from app.services.knowledge_service import knowledge_service
+from app.middleware.analytics import track_api_request
 
 chat_bp = Blueprint('chat', __name__)
 
 @chat_bp.route('/message', methods=['POST'])
+@track_api_request
 def process_message():
     """Process chat message from Flutter app"""
     try:
@@ -42,10 +45,23 @@ def process_message():
         }), 500
 
 @chat_bp.route('/health', methods=['GET'])
+@track_api_request
 def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'online',
-        'service': 'chatbot-api',
-        'message': 'API is running successfully'
-    })
+    """API health check endpoint"""
+    try:
+        # Test Gemini service connectivity
+        from app.services.gemini_service import gemini_service
+        
+        return jsonify({
+            'success': True,
+            'status': 'online',
+            'service': 'academic-chatbot-api',
+            'message': 'API is running successfully',
+            'timestamp': datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'status': 'error',
+            'message': str(e)
+        }), 500

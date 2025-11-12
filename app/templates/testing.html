@@ -54,9 +54,9 @@ function sendMessage() {
         document.getElementById(loadingId).remove();
         
         if (data.success) {
-            addMessage('bot', data.data.response);
+            addMessage('bot', data.response);
         } else {
-            addMessage('bot', 'Error: ' + (data.message || 'Terjadi kesalahan'));
+            addMessage('bot', data.response || data.error || 'Terjadi kesalahan');
         }
     })
     .catch(error => {

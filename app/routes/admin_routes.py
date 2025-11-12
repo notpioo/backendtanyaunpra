@@ -83,11 +83,64 @@ def api_docs():
     """API documentation page"""
     return render_template('api_docs.html')
 
-@admin_bp.route('/settings')
+@admin_bp.route('/analytics')
 @login_required
-def settings():
-    """Settings page"""
-    return render_template('settings.html')
+def analytics():
+    """Analytics dashboard page"""
+    return render_template('analytics.html')
+
+@admin_bp.route('/api/analytics/daily', methods=['GET'])
+@login_required
+def get_daily_analytics():
+    """Get daily analytics data"""
+    try:
+        from app.services.analytics_service import analytics_service
+        date = request.args.get('date')
+        stats = analytics_service.get_daily_stats(date)
+        return jsonify({
+            'success': True,
+            'data': stats
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@admin_bp.route('/api/analytics/realtime', methods=['GET'])
+@login_required
+def get_realtime_analytics():
+    """Get realtime request logs"""
+    try:
+        from app.services.analytics_service import analytics_service
+        limit = int(request.args.get('limit', 100))
+        logs = analytics_service.get_realtime_logs(limit)
+        return jsonify({
+            'success': True,
+            'data': logs
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@admin_bp.route('/api/analytics/stats', methods=['GET'])
+@login_required
+def get_global_analytics():
+    """Get global analytics statistics"""
+    try:
+        from app.services.analytics_service import analytics_service
+        stats = analytics_service.get_global_stats()
+        return jsonify({
+            'success': True,
+            'data': stats
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @admin_bp.route('/api/models/current-api-key')
 @login_required
@@ -176,11 +229,11 @@ def update_api_key():
                 "message": "API key cannot be empty"
             }), 400
 
-        # Validate API key format (basic validation)
-        if not new_api_key.startswith('AIza') or len(new_api_key) < 30:
+        # Validate API key format (minimal validation - just check length)
+        if len(new_api_key) < 20:
             return jsonify({
                 "success": False,
-                "message": "Invalid API key format. GEMINI API keys should start with 'AIza'"
+                "message": "API key too short. Please enter a valid GEMINI API key"
             }), 400
 
         # Test the API key first by trying to initialize the service
@@ -215,12 +268,16 @@ def update_api_key():
         else:
             update_messages.append("Runtime environment updated (use Replit Secrets for persistence)")
 
-        # Reload the service with new key
+        # Reload the service with new key (auto-reload from .env)
+        reload_success = False
         try:
             from app.services.gemini_service import gemini_service
-            gemini_service.reload_api_key()
+            reload_success = gemini_service.reload_api_key()
+            if reload_success:
+                update_messages.append("API key reloaded successfully - no restart needed!")
         except Exception as e:
             print(f"Warning: Could not reload Gemini service: {e}")
+            update_messages.append("Note: You may need to restart the app for changes to take full effect")
 
         message = "API key updated successfully! " + ", ".join(update_messages)
 

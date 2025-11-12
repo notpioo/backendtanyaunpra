@@ -4,6 +4,27 @@
 A Python Flask backend system for an academic virtual assistant chatbot with dark-themed admin panel. This system provides REST API endpoints for Flutter app integration, NLP processing using Google Gemini AI, and comprehensive knowledge base management.
 
 ## Recent Changes
+- **2025-11-12**: Multiple Announcements System & Bug Fixes
+  - **Announcement System Refactoring:**
+    - Changed from single announcement to multiple announcements support
+    - Added full CRUD operations: Create, Read, Update, Delete
+    - Each announcement has unique UUID and timestamps (created_at, updated_at)
+    - **Category Classification System:** Added 5 categories (Penting, Akademik, Umum, Info, Peraturan)
+      - Color-coded badges: Penting (red), Akademik (blue), Umum (gray), Info (teal), Peraturan (orange)
+      - Category select field in create/edit form
+      - Backend validation: only allowed categories accepted
+      - Default category: 'Umum' for backward compatibility
+    - New announcement service methods: `get_all_announcements()`, `create_announcement()`, `update_announcement()`, `delete_announcement()`
+    - Updated REST API routes with proper authentication (`@login_required`)
+    - Complete UI overhaul: list view with cards, add/edit form, delete confirmation
+    - Backward compatibility maintained for dashboard with `get_current_announcement()`
+    - Proper error handling and JSON validation for API endpoints
+    - Firebase structure: `announcements/` node with UUID-keyed entries
+  - **Chatbot Testing Bug Fix:**
+    - Fixed response rendering issue where bot messages didn't appear
+    - Corrected JavaScript to access `data.response` instead of `data.data.response`
+    - Improved error message display for API failures
+    
 - **2025-11-12**: Mobile & Desktop Navigation Fixes
   - **Mobile Navigation Enhancement:**
     - Mobile hamburger button now moves with navigation drawer (no longer sticky in place)

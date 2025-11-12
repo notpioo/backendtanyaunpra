@@ -1,0 +1,891 @@
+
+{% extends "base.html" %}
+
+{% block title %}Analytics - API Usage Tracking{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="page-header">
+        <div class="header-content">
+            <div>
+                <h1>📊 API Analytics Dashboard</h1>
+                <p class="header-subtitle">Real-time monitoring and endpoint usage tracking</p>
+            </div>
+            <div class="header-actions">
+                <button onclick="loadAllData()" class="btn-refresh">
+                    <i class="fas fa-sync-alt"></i> Refresh All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-card-primary">
+            <div class="stat-icon-wrapper primary">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Total Requests</div>
+                <div class="stat-value" id="totalRequests">0</div>
+                <div class="stat-trend">
+                    <i class="fas fa-arrow-up"></i> All time
+                </div>
+            </div>
+        </div>
+        <div class="stat-card stat-card-danger">
+            <div class="stat-icon-wrapper danger">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Total Errors</div>
+                <div class="stat-value" id="totalErrors">0</div>
+                <div class="stat-trend">
+                    <i class="fas fa-times-circle"></i> Failed requests
+                </div>
+            </div>
+        </div>
+        <div class="stat-card stat-card-warning">
+            <div class="stat-icon-wrapper warning">
+                <i class="fas fa-percent"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Error Rate</div>
+                <div class="stat-value" id="errorRate">0%</div>
+                <div class="stat-trend">
+                    <i class="fas fa-chart-line"></i> Success ratio
+                </div>
+            </div>
+        </div>
+        <div class="stat-card stat-card-info">
+            <div class="stat-icon-wrapper info">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Last Updated</div>
+                <div class="stat-value stat-value-small" id="lastUpdated">-</div>
+                <div class="stat-trend">
+                    <i class="fas fa-sync"></i> Auto-refresh 30s
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Filter Section -->
+    <div class="filter-card">
+        <div class="filter-header">
+            <h3><i class="fas fa-filter"></i> Filter Analytics</h3>
+        </div>
+        <div class="filter-body">
+            <div class="filter-group">
+                <label for="dateFilter">
+                    <i class="fas fa-calendar-alt"></i> Select Date
+                </label>
+                <input type="date" id="dateFilter" class="form-input">
+            </div>
+            <button onclick="loadDailyStats()" class="btn-filter">
+                <i class="fas fa-search"></i> Load Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Endpoints Section -->
+    <div class="analytics-card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fas fa-fire"></i>
+                <h2>Top Performing Endpoints</h2>
+            </div>
+            <div class="card-badge">Today</div>
+        </div>
+        <div class="card-body">
+            <div id="topEndpointsContainer">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading endpoint statistics...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Realtime Logs Section -->
+    <div class="analytics-card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="fas fa-bolt"></i>
+                <h2>Recent Activity Logs</h2>
+            </div>
+            <div class="card-actions">
+                <span class="live-indicator">
+                    <span class="pulse"></span>
+                    Live
+                </span>
+                <button onclick="loadRealtimeLogs()" class="btn-icon">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-wrapper">
+                <table class="analytics-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-clock"></i> Time</th>
+                            <th><i class="fas fa-code"></i> Method</th>
+                            <th><i class="fas fa-route"></i> Endpoint</th>
+                            <th><i class="fas fa-check-circle"></i> Status</th>
+                            <th><i class="fas fa-tachometer-alt"></i> Response Time</th>
+                            <th><i class="fas fa-network-wired"></i> IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="realtimeLogsBody">
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="loading-state">
+                                    <div class="spinner"></div>
+                                    <p>Loading recent requests...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.header-subtitle {
+    color: #a0aec0;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-refresh {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-refresh:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
+    border: 1px solid #2d3748;
+    border-radius: 16px;
+    padding: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+    border-color: #4a5568;
+}
+
+.stat-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.stat-icon-wrapper.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.stat-icon-wrapper.danger {
+    background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+    color: white;
+}
+
+.stat-icon-wrapper.warning {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: white;
+}
+
+.stat-icon-wrapper.info {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #a0aec0;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.stat-value-small {
+    font-size: 1.2rem;
+}
+
+.stat-trend {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Filter Card */
+.filter-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
+    border: 1px solid #2d3748;
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.filter-header {
+    background: #2d3748;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #4a5568;
+}
+
+.filter-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-body {
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #a0aec0;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-filter {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);
+}
+
+/* Analytics Cards */
+.analytics-card {
+    background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
+    border: 1px solid #2d3748;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.card-header {
+    background: #2d3748;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #4a5568;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-title i {
+    font-size: 1.25rem;
+    color: #667eea;
+}
+
+.card-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.card-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #48bb78;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.pulse {
+    width: 8px;
+    height: 8px;
+    background: #48bb78;
+    border-radius: 50%;
+    animation: pulse-animation 2s infinite;
+}
+
+@keyframes pulse-animation {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+.btn-icon {
+    background: #4a5568;
+    color: #a0aec0;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: #667eea;
+    color: white;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Endpoint Items */
+.endpoint-item {
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    border-left: 4px solid #667eea;
+}
+
+.endpoint-item:hover {
+    background: #2d3748;
+    border-color: #4a5568;
+    transform: translateX(4px);
+}
+
+.endpoint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.endpoint-path {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.endpoint-count {
+    background: #2d3748;
+    color: #667eea;
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.endpoint-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.endpoint-stat {
+    background: #2d3748;
+    padding: 0.75rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.endpoint-stat-label {
+    color: #a0aec0;
+    font-size: 0.85rem;
+}
+
+.endpoint-stat-value {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+/* Method Badges */
+.method-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.method-GET {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+}
+
+.method-POST {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+}
+
+.method-PUT {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: white;
+}
+
+.method-DELETE {
+    background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+    color: white;
+}
+
+/* Table Styles */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.analytics-table thead {
+    background: #2d3748;
+}
+
+.analytics-table th {
+    padding: 1rem;
+    text-align: left;
+    color: #a0aec0;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.analytics-table th i {
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.analytics-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #2d3748;
+    color: #cbd5e0;
+    font-size: 0.9rem;
+}
+
+.analytics-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.analytics-table tbody tr:hover {
+    background: #2d3748;
+}
+
+.status-success {
+    color: #48bb78;
+    font-weight: 600;
+}
+
+.status-error {
+    color: #f56565;
+    font-weight: 600;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    gap: 1rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #2d3748;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+    color: #a0aec0;
+    margin: 0;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+    }
+    
+    .filter-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .btn-filter {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .endpoint-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-table {
+        font-size: 0.85rem;
+    }
+    
+    .analytics-table th,
+    .analytics-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+    }
+    
+    .stat-icon-wrapper {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+}
+</style>
+
+<script>
+// Set today's date as default
+document.getElementById('dateFilter').valueAsDate = new Date();
+
+// Load all data
+function loadAllData() {
+    loadGlobalStats();
+    loadDailyStats();
+    loadRealtimeLogs();
+}
+
+// Load initial data
+loadAllData();
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+    loadGlobalStats();
+    loadRealtimeLogs();
+}, 30000);
+
+async function loadGlobalStats() {
+    try {
+        const response = await fetch('/api/analytics/stats');
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('totalRequests').textContent = result.data.total_requests.toLocaleString();
+            document.getElementById('totalErrors').textContent = result.data.total_errors.toLocaleString();
+            document.getElementById('errorRate').textContent = result.data.error_rate + '%';
+            
+            const lastUpdated = new Date(result.data.last_updated);
+            document.getElementById('lastUpdated').textContent = lastUpdated.toLocaleTimeString();
+        }
+    } catch (error) {
+        console.error('Failed to load global stats:', error);
+    }
+}
+
+async function loadDailyStats() {
+    const date = document.getElementById('dateFilter').value;
+    const container = document.getElementById('topEndpointsContainer');
+    
+    container.innerHTML = `
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading endpoint statistics...</p>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch(`/api/analytics/daily?date=${date}`);
+        const result = await response.json();
+        
+        if (result.success && result.data.endpoints.length > 0) {
+            container.innerHTML = result.data.endpoints.slice(0, 10).map(endpoint => `
+                <div class="endpoint-item">
+                    <div class="endpoint-header">
+                        <span class="endpoint-path">
+                            <span class="method-badge method-${endpoint.method}">${endpoint.method}</span>
+                            ${endpoint.endpoint}
+                        </span>
+                        <span class="endpoint-count">${endpoint.count} requests</span>
+                    </div>
+                    <div class="endpoint-stats">
+                        <div class="endpoint-stat">
+                            <span class="endpoint-stat-label">Avg Time</span>
+                            <span class="endpoint-stat-value">${endpoint.avg_response_time}s</span>
+                        </div>
+                        <div class="endpoint-stat">
+                            <span class="endpoint-stat-label">Errors</span>
+                            <span class="endpoint-stat-value ${endpoint.errors > 0 ? 'status-error' : 'status-success'}">
+                                ${endpoint.errors}
+                            </span>
+                        </div>
+                        <div class="endpoint-stat">
+                            <span class="endpoint-stat-label">Last Request</span>
+                            <span class="endpoint-stat-value">${new Date(endpoint.last_request).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = `
+                <div class="loading-state">
+                    <p>No data available for this date</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load daily stats:', error);
+        container.innerHTML = `
+            <div class="loading-state">
+                <p>Failed to load data</p>
+            </div>
+        `;
+    }
+}
+
+async function loadRealtimeLogs() {
+    const tbody = document.getElementById('realtimeLogsBody');
+    
+    try {
+        const response = await fetch('/api/analytics/realtime?limit=50');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            tbody.innerHTML = result.data.map(log => {
+                const time = new Date(log.timestamp).toLocaleTimeString();
+                const statusClass = log.status_code >= 400 ? 'status-error' : 'status-success';
+                
+                return `
+                    <tr>
+                        <td>${time}</td>
+                        <td><span class="method-badge method-${log.method}">${log.method}</span></td>
+                        <td style="font-family: monospace;">${log.endpoint}</td>
+                        <td><span class="${statusClass}">${log.status_code}</span></td>
+                        <td>${log.response_time}s</td>
+                        <td style="font-size: 0.85rem; color: #718096;">${log.ip}</td>
+                    </tr>
+                `;
+            }).join('');
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="loading-state">
+                            <p>No recent requests</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load realtime logs:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">
+                    <div class="loading-state">
+                        <p>Failed to load logs</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+</script>
+{% endblock %}

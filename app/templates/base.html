@@ -19,17 +19,17 @@
                 <button class="mobile-toggle" id="mobileToggle" aria-label="Open Navigation" aria-expanded="false" title="Open Navigation">
                     <i class="fas fa-bars"></i>
                 </button>
-                
+
                 <div class="logo-container">
                     <h2 class="logo-text">Admin</h2>
                 </div>
-                
+
                 <!-- Desktop Collapse Toggle -->
                 <button class="sidebar-collapse-btn" id="desktopCollapseBtn" aria-label="Toggle Sidebar" title="Collapse/Expand">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
-            
+
             <ul class="sidebar-menu">
                 <li>
                     <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}" data-tooltip="Dashboard">
@@ -68,9 +68,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ url_for('admin.settings') }}" class="{% if request.endpoint == 'admin.settings' %}active{% endif %}" data-tooltip="Settings">
-                        <i class="fas fa-cog"></i>
-                        <span class="menu-text">Settings</span>
+                    <a href="/analytics" class="{% if request.path == '/analytics' %}active{% endif %}" data-tooltip="Analytics">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="menu-text">Analytics</span>
                     </a>
                 </li>
                 <li class="menu-divider">
@@ -91,7 +91,7 @@
                 </button>
                 <h1>{% block page_title %}Dashboard{% endblock %}</h1>
             </header>
-            
+
             <div class="content-wrapper">
                 {% block content %}{% endblock %}
             </div>

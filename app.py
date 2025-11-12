@@ -9,9 +9,9 @@ from app.routes.knowledge_routes import knowledge_bp
 from app.routes.announcement_routes import announcement_bp
 from app.config.firebase_config import initialize_firebase
 
-# Load environment variables from .env file if it exists
-# This allows using either .env files or Replit secrets
-load_dotenv(dotenv_path='.env', override=False)  # override=False means env vars take priority over .env
+# Load environment variables from .env file with priority
+# override=True means .env file takes priority over existing env vars (including Replit Secrets)
+load_dotenv(dotenv_path='.env', override=True)
 
 def create_app():
     app = Flask(__name__, template_folder='app/templates', static_folder='app/static')

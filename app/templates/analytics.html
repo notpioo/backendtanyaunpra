@@ -4,7 +4,7 @@
 {% block title %}Analytics - API Usage Tracking{% endblock %}
 
 {% block content %}
-<div class="content-wrapper">
+<div class="content-wrapper" style="overflow-x: hidden; max-width: 100%;">
     <div class="page-header">
         <div class="header-content">
             <div>
@@ -158,6 +158,8 @@
 /* Page Header */
 .page-header {
     margin-bottom: 2rem;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .header-content {
@@ -166,6 +168,7 @@
     align-items: center;
     gap: 1.5rem;
     flex-wrap: wrap;
+    max-width: 100%;
 }
 
 .page-header h1 {
@@ -208,19 +211,21 @@
 /* Stats Grid */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
     margin-bottom: 2rem;
+    max-width: 900px;
+    overflow-x: hidden;
 }
 
 .stat-card {
     background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
     border: 1px solid #2d3748;
-    border-radius: 16px;
-    padding: 1.75rem;
+    border-radius: 12px;
+    padding: 1.25rem;
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1rem;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -249,13 +254,13 @@
 }
 
 .stat-icon-wrapper {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     flex-shrink: 0;
 }
 
@@ -284,29 +289,29 @@
 }
 
 .stat-label {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #a0aec0;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .stat-value {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: #ffffff;
     line-height: 1.2;
 }
 
 .stat-value-small {
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 .stat-trend {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #718096;
-    margin-top: 0.5rem;
+    margin-top: 0.4rem;
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -388,6 +393,7 @@
     border-radius: 16px;
     margin-bottom: 2rem;
     overflow: hidden;
+    max-width: 100%;
 }
 
 .card-header {
@@ -533,8 +539,9 @@
 
 .endpoint-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
+    max-width: 100%;
 }
 
 .endpoint-stat {
@@ -592,6 +599,8 @@
 .table-wrapper {
     overflow-x: auto;
     border-radius: 8px;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
 .analytics-table {
@@ -679,26 +688,75 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
     .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .content-wrapper {
+        padding: 24px;
     }
 }
 
 @media (max-width: 768px) {
+    .content-wrapper {
+        padding: 20px;
+        overflow-x: hidden;
+    }
+    
+    .page-header {
+        overflow-x: hidden;
+    }
+    
     .page-header h1 {
         font-size: 1.5rem;
     }
     
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
     }
     
     .stat-card {
-        padding: 1.5rem;
+        padding: 1.25rem;
+        max-width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        font-size: 1.4rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-info {
+        width: 100%;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .stat-value-small {
+        font-size: 0.9rem;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    .stat-trend {
+        font-size: 0.7rem;
+    }
+    
+    .filter-card {
+        overflow-x: hidden;
     }
     
     .filter-body {
         flex-direction: column;
         align-items: stretch;
+        padding: 1rem;
     }
     
     .filter-group {
@@ -710,24 +768,92 @@
         justify-content: center;
     }
     
+    .card-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .card-body {
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+    
+    .endpoint-item {
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+    
+    .endpoint-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .endpoint-path {
+        font-size: 0.9rem;
+        word-break: break-all;
+    }
+    
     .endpoint-stats {
         grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
     
     .analytics-table {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        display: block;
+        overflow-x: auto;
     }
     
-    .analytics-table th,
+    .analytics-table thead {
+        display: none;
+    }
+    
+    .analytics-table tbody {
+        display: block;
+    }
+    
+    .analytics-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #2d3748;
+        border-radius: 8px;
+        padding: 0.75rem;
+    }
+    
     .analytics-table td {
-        padding: 0.75rem 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #2d3748;
+    }
+    
+    .analytics-table td:last-child {
+        border-bottom: none;
+    }
+    
+    .analytics-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #a0aec0;
     }
 }
 
 @media (max-width: 480px) {
+    .content-wrapper {
+        padding: 16px;
+    }
+    
     .header-content {
         flex-direction: column;
         align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .btn-refresh {
+        width: 100%;
+        justify-content: center;
     }
     
     .stat-value {
@@ -738,6 +864,23 @@
         width: 50px;
         height: 50px;
         font-size: 1.5rem;
+    }
+    
+    .filter-header h3 {
+        font-size: 1rem;
+    }
+    
+    .card-title h2 {
+        font-size: 1.1rem;
+    }
+    
+    .endpoint-path {
+        font-size: 0.85rem;
+    }
+    
+    .method-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.7rem;
     }
 }
 </style>
@@ -854,12 +997,12 @@ async function loadRealtimeLogs() {
                 
                 return `
                     <tr>
-                        <td>${time}</td>
-                        <td><span class="method-badge method-${log.method}">${log.method}</span></td>
-                        <td style="font-family: monospace;">${log.endpoint}</td>
-                        <td><span class="${statusClass}">${log.status_code}</span></td>
-                        <td>${log.response_time}s</td>
-                        <td style="font-size: 0.85rem; color: #718096;">${log.ip}</td>
+                        <td data-label="Time">${time}</td>
+                        <td data-label="Method"><span class="method-badge method-${log.method}">${log.method}</span></td>
+                        <td data-label="Endpoint" style="font-family: monospace; word-break: break-all;">${log.endpoint}</td>
+                        <td data-label="Status"><span class="${statusClass}">${log.status_code}</span></td>
+                        <td data-label="Response Time">${log.response_time}s</td>
+                        <td data-label="IP Address" style="font-size: 0.85rem; color: #718096;">${log.ip}</td>
                     </tr>
                 `;
             }).join('');

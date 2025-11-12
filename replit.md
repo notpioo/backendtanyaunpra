@@ -4,6 +4,51 @@
 A Python Flask backend system for an academic virtual assistant chatbot with dark-themed admin panel. This system provides REST API endpoints for Flutter app integration, NLP processing using Google Gemini AI, and comprehensive knowledge base management.
 
 ## Recent Changes
+- **2025-11-12**: Knowledge Page Enhanced with Search, Filter & Mobile View
+  - **Search & Filter Features:**
+    - Added search bar for searching across questions, answers, and keywords
+    - Added category filter dropdown (Umum, Akademik, Administrasi, Fasilitas, Peraturan)
+    - Real-time filtering with live count display
+    - Search and filter work on both desktop table and mobile list views
+  - **Category Badge System:**
+    - Color-coded category badges: Umum (gray), Akademik (blue), Administrasi (green), Fasilitas (orange), Peraturan (red)
+    - Badges display consistently in both table and list views
+    - Proper lowercase class matching for CSS styling
+  - **Responsive Design:**
+    - **Desktop (>768px)**: Table view with sortable columns
+    - **Mobile (≤768px)**: Card-based list view with better readability
+    - Search bar and filter in single row on mobile for space efficiency
+    - Mobile list shows question, answer preview, keywords, and action buttons
+  - **Interactive Features:**
+    - Filter by category dropdown
+    - Search across multiple fields simultaneously
+    - Add/Edit/Delete functionality preserved on mobile
+    - Live count of displayed vs total knowledge entries
+
+- **2025-11-12**: Data User Page Implementation
+  - **New Data User Feature:**
+    - Created comprehensive user data management page in admin panel
+    - Integrated Firebase Firestore for real-time user data fetching
+    - Display user information: name, NIM, faculty, and study program
+    - **UserService Implementation:**
+      - Runtime Firebase detection for better compatibility
+      - Fallback to mock data when Firebase is not initialized
+      - Fetches from `users` collection in Firestore
+      - Support for user profile images and avatars
+    - **Responsive UI Design:**
+      - Beautiful statistics cards showing total users, faculties, and programs
+      - Advanced table with search, filter by faculty, and sortable columns
+      - User avatars with placeholder initials when no image available
+      - Mobile-friendly responsive design with horizontal scroll for table
+      - Dark theme matching existing admin panel design
+    - **Interactive Features:**
+      - Real-time search across name, NIM, faculty, and program
+      - Faculty filter dropdown for quick filtering
+      - Sortable columns (name, NIM, faculty, program)
+      - Live count of displayed vs total users
+    - Added `/users` route in admin panel
+    - Navigation menu updated with "Data User" link
+
 - **2025-11-12**: Multiple Announcements System & Bug Fixes
   - **Announcement System Refactoring:**
     - Changed from single announcement to multiple announcements support

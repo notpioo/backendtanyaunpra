@@ -73,6 +73,12 @@
                         <span class="menu-text">Analytics</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ url_for('admin.users') }}" class="{% if request.endpoint == 'admin.users' %}active{% endif %}" data-tooltip="Data User">
+                        <i class="fas fa-users"></i>
+                        <span class="menu-text">Data User</span>
+                    </a>
+                </li>
                 <li class="menu-divider">
                     <a href="{{ url_for('admin.logout') }}" class="logout-link" data-tooltip="Logout">
                         <i class="fas fa-sign-out-alt"></i>

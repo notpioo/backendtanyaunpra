@@ -4,28 +4,51 @@
 {% block page_title %}Knowledge Management{% endblock %}
 
 {% block content %}
-<div class="mb-4">
+<div class="knowledge-header">
     <button class="btn btn-primary" onclick="showAddModal()">
-        <i class="fas fa-plus"></i> Add New Knowledge
+        <i class="fas fa-plus"></i> Tambah Knowledge
     </button>
 </div>
 
-<div class="table-container">
+<!-- Search and Filter Controls -->
+<div class="knowledge-controls">
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Cari pertanyaan, jawaban, atau keywords..." />
+    </div>
+    <div class="filter-group">
+        <select id="categoryFilter" class="filter-select">
+            <option value="">Semua Kategori</option>
+            <option value="umum">Umum</option>
+            <option value="akademik">Akademik</option>
+            <option value="administrasi">Administrasi</option>
+            <option value="fasilitas">Fasilitas</option>
+            <option value="peraturan">Peraturan</option>
+        </select>
+    </div>
+</div>
+
+<!-- Desktop Table View -->
+<div class="table-container desktop-only">
     <table class="table">
         <thead>
             <tr>
-                <th>Question</th>
-                <th>Category</th>
+                <th>Pertanyaan</th>
+                <th>Kategori</th>
                 <th>Keywords</th>
-                <th>Created</th>
-                <th>Actions</th>
+                <th>Dibuat</th>
+                <th>Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="knowledgeTableBody">
             {% for item in knowledge_list %}
-            <tr>
+            <tr class="knowledge-row" 
+                data-question="{{ item.question|lower }}"
+                data-answer="{{ item.answer|lower }}"
+                data-category="{{ (item.category or 'umum')|lower }}"
+                data-keywords="{{ (item.keywords or '')|lower }}">
                 <td>{{ item.question[:100] }}{% if item.question|length > 100 %}...{% endif %}</td>
-                <td>{{ item.category or 'General' }}</td>
+                <td><span class="category-badge category-{{ (item.category or 'umum')|lower }}">{{ item.category or 'Umum' }}</span></td>
                 <td>{{ item.keywords or '-' }}</td>
                 <td>{{ item.created_at[:10] if item.created_at else '-' }}</td>
                 <td>
@@ -40,14 +63,58 @@
                 </td>
             </tr>
             {% else %}
-            <tr>
+            <tr class="no-data-row">
                 <td colspan="5" style="text-align: center; color: #a0aec0;">
-                    No knowledge entries found. Click "Add New Knowledge" to get started.
+                    Tidak ada knowledge. Klik "Tambah Knowledge" untuk memulai.
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<!-- Mobile List View -->
+<div class="knowledge-list-container mobile-only" id="knowledgeListContainer">
+    {% if knowledge_list %}
+        {% for item in knowledge_list %}
+        <div class="knowledge-list-item" 
+             data-question="{{ item.question|lower }}"
+             data-answer="{{ item.answer|lower }}"
+             data-category="{{ (item.category or 'umum')|lower }}"
+             data-keywords="{{ (item.keywords or '')|lower }}">
+            <div class="knowledge-list-header">
+                <div class="knowledge-question">{{ item.question[:80] }}{% if item.question|length > 80 %}...{% endif %}</div>
+                <span class="category-badge category-{{ (item.category or 'umum')|lower }}">{{ item.category or 'Umum' }}</span>
+            </div>
+            <div class="knowledge-list-answer">
+                {{ item.answer[:120] }}{% if item.answer|length > 120 %}...{% endif %}
+            </div>
+            {% if item.keywords %}
+            <div class="knowledge-list-keywords">
+                <i class="fas fa-tags"></i> {{ item.keywords }}
+            </div>
+            {% endif %}
+            <div class="knowledge-list-actions">
+                <button class="btn btn-sm btn-warning" onclick="editKnowledge('{{ item.id }}')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteKnowledge('{{ item.id }}')">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-data-list">
+            <i class="fas fa-inbox"></i>
+            <p>Tidak ada knowledge. Klik "Tambah Knowledge" untuk memulai.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Result Count -->
+<div class="knowledge-footer">
+    <p id="resultCount">Menampilkan <span id="displayedCount">{{ knowledge_list|length }}</span> dari <span id="totalCount">{{ knowledge_list|length }}</span> knowledge</p>
 </div>
 
 <!-- Add/Edit Modal -->
@@ -95,7 +162,364 @@
 {% endblock %}
 
 {% block scripts %}
+<style>
+/* Knowledge Page Styles */
+.knowledge-header {
+    margin-bottom: 20px;
+}
+
+/* Search and Filter Controls */
+.knowledge-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+    align-items: center;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    background-color: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-select {
+    padding: 12px 15px;
+    background-color: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.filter-select:hover {
+    border-color: #3182ce;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+/* Category Badges */
+.category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.category-umum {
+    background-color: #4a5568;
+    color: #ffffff;
+}
+
+.category-akademik {
+    background-color: #3182ce;
+    color: #ffffff;
+}
+
+.category-administrasi {
+    background-color: #38a169;
+    color: #ffffff;
+}
+
+.category-fasilitas {
+    background-color: #dd6b20;
+    color: #ffffff;
+}
+
+.category-peraturan {
+    background-color: #e53e3e;
+    color: #ffffff;
+}
+
+/* Desktop/Mobile View Toggle */
+.desktop-only {
+    display: block;
+}
+
+.mobile-only {
+    display: none !important;
+}
+
+/* Mobile List View */
+.knowledge-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.knowledge-list-item {
+    background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.knowledge-list-item:hover {
+    border-color: #3182ce;
+    transform: translateX(5px);
+}
+
+.knowledge-list-item.hidden {
+    display: none;
+}
+
+.knowledge-row.hidden {
+    display: none;
+}
+
+.knowledge-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #2d3748;
+}
+
+.knowledge-question {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #ffffff;
+    flex: 1;
+    line-height: 1.4;
+}
+
+.knowledge-list-answer {
+    color: #cbd5e0;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.knowledge-list-keywords {
+    color: #a0aec0;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.knowledge-list-keywords i {
+    color: #3182ce;
+}
+
+.knowledge-list-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.no-data-list {
+    text-align: center;
+    padding: 60px 20px;
+    color: #a0aec0;
+    background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+}
+
+.no-data-list i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: block;
+    opacity: 0.5;
+}
+
+.no-data-list p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Knowledge Footer */
+.knowledge-footer {
+    padding: 15px 20px;
+    background-color: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.knowledge-footer p {
+    margin: 0;
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
+.knowledge-footer span {
+    font-weight: 600;
+    color: #3182ce;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    /* Hide desktop table, show mobile list */
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: flex !important;
+    }
+    
+    .knowledge-controls {
+        flex-direction: row;
+        gap: 10px;
+    }
+    
+    .search-box {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .filter-group {
+        flex-shrink: 0;
+    }
+    
+    .filter-select {
+        min-width: 150px;
+        width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .knowledge-header {
+        margin-bottom: 15px;
+    }
+    
+    .knowledge-list-item {
+        padding: 12px;
+    }
+    
+    .knowledge-question {
+        font-size: 0.95rem;
+    }
+    
+    .knowledge-list-answer {
+        font-size: 0.85rem;
+    }
+    
+    .knowledge-list-actions .btn {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}
+</style>
+
 <script>
+// Search and Filter Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const knowledgeTableBody = document.getElementById('knowledgeTableBody');
+    const knowledgeListContainer = document.getElementById('knowledgeListContainer');
+    const displayedCount = document.getElementById('displayedCount');
+    const totalCount = document.getElementById('totalCount');
+    
+    // Get both table rows and list items
+    const tableRows = knowledgeTableBody ? knowledgeTableBody.querySelectorAll('.knowledge-row') : [];
+    const listItems = knowledgeListContainer ? knowledgeListContainer.querySelectorAll('.knowledge-list-item') : [];
+    
+    function filterKnowledge() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedCategory = categoryFilter.value.toLowerCase();
+        let visibleCount = 0;
+        
+        // Filter table rows (desktop)
+        tableRows.forEach(row => {
+            const question = row.dataset.question || '';
+            const answer = row.dataset.answer || '';
+            const category = row.dataset.category || '';
+            const keywords = row.dataset.keywords || '';
+            
+            const matchesSearch = !searchTerm || 
+                question.includes(searchTerm) || 
+                answer.includes(searchTerm) || 
+                keywords.includes(searchTerm);
+            
+            const matchesCategory = !selectedCategory || category === selectedCategory;
+            
+            if (matchesSearch && matchesCategory) {
+                row.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+        
+        // Filter list items (mobile)
+        listItems.forEach(item => {
+            const question = item.dataset.question || '';
+            const answer = item.dataset.answer || '';
+            const category = item.dataset.category || '';
+            const keywords = item.dataset.keywords || '';
+            
+            const matchesSearch = !searchTerm || 
+                question.includes(searchTerm) || 
+                answer.includes(searchTerm) || 
+                keywords.includes(searchTerm);
+            
+            const matchesCategory = !selectedCategory || category === selectedCategory;
+            
+            if (matchesSearch && matchesCategory) {
+                item.classList.remove('hidden');
+                // Only count once (either from rows or listItems)
+                if (tableRows.length === 0) visibleCount++;
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+        
+        displayedCount.textContent = visibleCount;
+    }
+    
+    if (searchInput) searchInput.addEventListener('input', filterKnowledge);
+    if (categoryFilter) categoryFilter.addEventListener('change', filterKnowledge);
+});
+
 let currentEditId = null;
 
 function showAddModal() {

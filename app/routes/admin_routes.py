@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, flash
 from app.services.knowledge_service import knowledge_service
 from app.services.announcement_service import announcement_service
+from app.services.user_service import user_service
 from app.middleware.auth import login_required, check_admin_credentials
 
 admin_bp = Blueprint('admin', __name__)
@@ -88,6 +89,18 @@ def api_docs():
 def analytics():
     """Analytics dashboard page"""
     return render_template('analytics.html')
+
+@admin_bp.route('/users')
+@login_required
+def users():
+    """User data management page"""
+    try:
+        users_list = user_service.get_all_users()
+        stats = user_service.get_user_stats()
+        return render_template('users.html', users=users_list, stats=stats)
+    except Exception as e:
+        print(f"Error in users route: {e}")
+        return render_template('users.html', users=[], stats={'total_users': 0, 'by_faculty': {}, 'by_program': {}})
 
 @admin_bp.route('/api/analytics/daily', methods=['GET'])
 @login_required

@@ -4,6 +4,35 @@
 A Python Flask backend system for an academic virtual assistant chatbot with dark-themed admin panel. This system provides REST API endpoints for Flutter app integration, NLP processing using Google Gemini AI, and comprehensive knowledge base management.
 
 ## Recent Changes
+- **2025-11-14**: Image Upload System for Knowledge Base
+  - **Cloudinary Integration:**
+    - Integrated Cloudinary for cloud image storage and management
+    - Created `cloudinary_service.py` with upload/delete functionality
+    - Credential validation on startup with clear error messages
+    - Secure handling of API keys via Replit Secrets
+  - **Knowledge Base Image Support:**
+    - Extended knowledge entries to support `image_url` and `image_public_id` fields
+    - Admin UI supports image upload with live preview
+    - Image management: upload new, replace existing, or remove images
+    - Proper error handling for upload/delete failures
+  - **Chatbot Image Responses:**
+    - Chatbot can now send images in responses when relevant to queries
+    - Search results include image_url when available
+    - Testing interface renders images in chat messages
+    - Example use case: Send university logo when asked "apa logo universitas?"
+  - **Critical Bug Fixes:**
+    - Fixed form data handling to preserve file objects
+    - Fixed remove_image flag to handle JSON boolean and form checkbox 'on' value
+    - Added 404 validation before processing updates
+    - Implemented proper Cloudinary delete error handling
+    - Fixed Firebase metadata clearing when images are removed
+    - Ensures consistency between Cloudinary storage and Firebase metadata
+  - **Production-Ready Implementation:**
+    - Complete error handling with user-friendly messages
+    - Debug logging for all image operations
+    - Prevents stale metadata when Cloudinary operations fail
+    - Supports both JSON API and multipart form submissions
+
 - **2025-11-12**: Knowledge Page Enhanced with Search, Filter & Mobile View
   - **Search & Filter Features:**
     - Added search bar for searching across questions, answers, and keywords
@@ -117,7 +146,7 @@ A Python Flask backend system for an academic virtual assistant chatbot with dar
 ## Project Architecture
 - **Backend**: Python Flask with organized MVC structure
   - `/app/routes/`: API endpoint handlers (chat, knowledge, admin)
-  - `/app/services/`: Business logic (Gemini AI, Knowledge management)
+  - `/app/services/`: Business logic (Gemini AI, Knowledge management, Cloudinary image service)
   - `/app/config/`: Configuration (Firebase mock/real setup)
   - `/app/templates/`: Admin panel HTML templates
   - `/app/static/`: CSS/JS assets for dark theme
@@ -131,15 +160,17 @@ A Python Flask backend system for an academic virtual assistant chatbot with dar
   - `.gitignore`: Python project ignore patterns
 
 - **Database**: Mock Firebase Realtime Database (development), ready for production Firebase
+- **Cloud Storage**: Cloudinary for image hosting with automatic optimization
 - **AI Integration**: Google Gemini 2.5 Flash with academic content filtering
 - **Frontend**: Dark-themed responsive admin panel with dashboard, CRUD operations, chatbot testing
 
 ## Key Features Implemented
-1. **Chatbot API** (`/api/chat/message`): Natural Indonesian language responses for academic queries
-2. **Knowledge Management API** (`/api/knowledge/`): CRUD operations for knowledge base
-3. **Admin Panel**: Dark-themed interface with dashboard, testing, knowledge management
+1. **Chatbot API** (`/api/chat/message`): Natural Indonesian language responses for academic queries with image support
+2. **Knowledge Management API** (`/api/knowledge/`): CRUD operations for knowledge base with image upload/management
+3. **Admin Panel**: Dark-themed interface with dashboard, testing, knowledge management, and image uploads
 4. **Academic Filtering**: AI-powered filtering to ensure academic-focused responses
-5. **Mobile Ready**: REST API endpoints ready for Flutter integration
+5. **Image Management**: Cloudinary integration for uploading, storing, and delivering images in chatbot responses
+6. **Mobile Ready**: REST API endpoints ready for Flutter integration
 
 ## User Preferences
 - Dark theme UI matching provided design

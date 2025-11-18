@@ -1,5 +1,5 @@
 from app.config.firebase_config import get_db
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 import uuid
 from datetime import datetime
 
@@ -44,8 +44,10 @@ class KnowledgeService:
             print(f"Error getting knowledge by ID: {e}")
             return None
     
-    def search_knowledge(self, query: str) -> str:
-        """Search for relevant knowledge based on query with improved semantic matching"""
+    def search_knowledge(self, query: str) -> Dict:
+        """Search for relevant knowledge based on query with improved semantic matching
+        Returns dict with 'context' (text) and 'image_url' (if available)
+        """
         try:
             knowledge_list = self.get_all_knowledge()
             relevant_context = []
@@ -63,7 +65,9 @@ class KnowledgeService:
                 'nama': ['siapa', 'namanya', 'identitas'],
                 'tau': ['tahu', 'kenal', 'mengetahui'],
                 'dari': ['di', 'pada', 'untuk'],
-                'adalah': ['yaitu', 'ialah', 'merupakan']
+                'adalah': ['yaitu', 'ialah', 'merupakan'],
+                'logo': ['lambang', 'simbol', 'emblem'],
+                'gambar': ['foto', 'image', 'picture']
             }
             
             # Normalize query by expanding with synonyms
@@ -95,7 +99,9 @@ class KnowledgeService:
                     relevant_context.append({
                         'content': f"Q: {item.get('question', '')}\nA: {item.get('answer', '')}",
                         'score': 100,
-                        'match_type': 'exact'
+                        'match_type': 'exact',
+                        'image_url': item.get('image_url', ''),
+                        'has_image': bool(item.get('image_url'))
                     })
                     print(f"✅ Exact match found: {item.get('question', '')[:50]}...")
                     continue
@@ -129,26 +135,38 @@ class KnowledgeService:
                             'content': f"Q: {item.get('question', '')}\nA: {item.get('answer', '')}",
                             'score': final_score,
                             'match_type': 'semantic',
-                            'matches': matches_found
+                            'matches': matches_found,
+                            'image_url': item.get('image_url', ''),
+                            'has_image': bool(item.get('image_url'))
                         })
                         print(f"🎯 Semantic match found: {item.get('question', '')[:50]}... (score: {final_score:.1f}%, matches: {matches_found})")
             
             # Sort by score (highest first)
             relevant_context.sort(key=lambda x: x['score'], reverse=True)
             
-            # Return top 3 matches
+            # Return top match with image if available
             result_content = []
+            result_image_url = ""
+            
             for item in relevant_context[:3]:
                 result_content.append(item['content'])
+                # Use image from first match that has one
+                if not result_image_url and item.get('has_image'):
+                    result_image_url = item.get('image_url', '')
             
-            result = "\n\n".join(result_content)
+            result_text = "\n\n".join(result_content)
             print(f"📋 Found {len(relevant_context)} matches, returning {min(3, len(relevant_context))}")
+            if result_image_url:
+                print(f"🖼️ Image found: {result_image_url}")
             
-            return result
+            return {
+                'context': result_text,
+                'image_url': result_image_url
+            }
             
         except Exception as e:
             print(f"❌ Error searching knowledge: {e}")
-            return ""
+            return {'context': '', 'image_url': ''}
     
     def _calculate_similarity(self, word1: str, word2: str) -> float:
         """Calculate similarity between two words using simple character overlap"""
@@ -164,7 +182,7 @@ class KnowledgeService:
         
         return intersection / union if union > 0 else 0.0
     
-    def add_knowledge(self, question: str, answer: str, category: str = "general", keywords: str = "") -> bool:
+    def add_knowledge(self, question: str, answer: str, category: str = "general", keywords: str = "", image_url: str = "", image_public_id: str = "") -> bool:
         """Add new knowledge entry"""
         try:
             db_ref = self.get_db_ref()
@@ -178,6 +196,11 @@ class KnowledgeService:
                 'updated_at': datetime.now().isoformat()
             }
             
+            if image_url:
+                new_entry['image_url'] = image_url
+            if image_public_id:
+                new_entry['image_public_id'] = image_public_id
+            
             # Debug logging
             print(f"🔥 Adding knowledge to database type: {type(db_ref)}")
             print(f"🔥 Database reference: {db_ref}")
@@ -190,8 +213,13 @@ class KnowledgeService:
             print(f"❌ Error adding knowledge: {e}")
             return False
     
-    def update_knowledge(self, knowledge_id: str, question: str, answer: str, category: str = "general", keywords: str = "") -> bool:
-        """Update existing knowledge entry"""
+    def update_knowledge(self, knowledge_id: str, question: str, answer: str, category: str = "general", keywords: str = "", image_url: Optional[str] = None, image_public_id: Optional[str] = None) -> bool:
+        """Update existing knowledge entry
+        
+        Args:
+            image_url: Image URL or None to leave unchanged, empty string to remove
+            image_public_id: Image public_id or None to leave unchanged, empty string to remove
+        """
         try:
             knowledge_ref = self.get_db_ref().child('knowledge').child(knowledge_id)
             updated_entry = {
@@ -202,18 +230,45 @@ class KnowledgeService:
                 'updated_at': datetime.now().isoformat()
             }
             
+            # Handle image fields: None = no change, empty string = remove, value = update
+            if image_url is not None:
+                if image_url == "":
+                    # Explicitly remove the field from Firebase
+                    updated_entry['image_url'] = None
+                else:
+                    updated_entry['image_url'] = image_url
+                    
+            if image_public_id is not None:
+                if image_public_id == "":
+                    # Explicitly remove the field from Firebase
+                    updated_entry['image_public_id'] = None
+                else:
+                    updated_entry['image_public_id'] = image_public_id
+            
             knowledge_ref.update(updated_entry)
+            print(f"✅ Knowledge updated: {knowledge_id}")
             return True
             
         except Exception as e:
-            print(f"Error updating knowledge: {e}")
+            print(f"❌ Error updating knowledge: {e}")
             return False
     
-    def delete_knowledge(self, knowledge_id: str) -> bool:
-        """Delete knowledge entry"""
+    def delete_knowledge(self, knowledge_id: str) -> Union[bool, str]:
+        """Delete knowledge entry and return image_public_id if exists for Cloudinary cleanup
+        Returns: True if successful (no image), image_public_id (str) if image exists, False on error
+        """
         try:
+            # Get knowledge to check for image
+            knowledge_data = self.get_knowledge_by_id(knowledge_id)
+            
+            # Delete from Firebase
             knowledge_ref = self.get_db_ref().child('knowledge').child(knowledge_id)
             knowledge_ref.delete()
+            
+            # Return the image public_id if exists, so it can be deleted from Cloudinary
+            if knowledge_data and 'image_public_id' in knowledge_data:
+                return str(knowledge_data.get('image_public_id', ''))
+            
             return True
             
         except Exception as e:

@@ -30,10 +30,16 @@ def process_message():
             })
         
         # Search for relevant knowledge in database
-        knowledge_context = knowledge_service.search_knowledge(user_message)
+        knowledge_result = knowledge_service.search_knowledge(user_message)
+        knowledge_context = knowledge_result.get('context', '')
+        knowledge_image_url = knowledge_result.get('image_url', '')
         
         # Generate response using Gemini
         ai_response = gemini_service.generate_response(user_message, knowledge_context)
+        
+        # Add image URL to response if available
+        if knowledge_image_url:
+            ai_response['image_url'] = knowledge_image_url
         
         return jsonify(ai_response)
         

@@ -54,7 +54,7 @@ function sendMessage() {
         document.getElementById(loadingId).remove();
         
         if (data.success) {
-            addMessage('bot', data.response);
+            addMessage('bot', data.response, data.image_url);
         } else {
             addMessage('bot', data.response || data.error || 'Terjadi kesalahan');
         }
@@ -67,7 +67,7 @@ function sendMessage() {
     });
 }
 
-function addMessage(type, content) {
+function addMessage(type, content, imageUrl = null) {
     const messagesContainer = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
     const messageId = 'msg-' + Date.now();
@@ -75,7 +75,14 @@ function addMessage(type, content) {
     messageDiv.className = 'chat-message ' + type;
     
     const label = type === 'user' ? 'You' : 'Chatbot';
-    messageDiv.innerHTML = `<strong>${label}:</strong> ${content}`;
+    let messageContent = `<strong>${label}:</strong> ${content}`;
+    
+    // Add image if present
+    if (imageUrl && type === 'bot') {
+        messageContent += `<br><img src="${imageUrl}" alt="Knowledge Image" style="max-width: 100%; max-height: 300px; margin-top: 10px; border-radius: 8px; border: 2px solid #2d3748;">`;
+    }
+    
+    messageDiv.innerHTML = messageContent;
     
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;

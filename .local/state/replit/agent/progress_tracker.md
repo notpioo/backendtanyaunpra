@@ -19,3 +19,8 @@
 [x] 19. Implemented category badges with color coding (Umum, Akademik, Administrasi, Fasilitas, Peraturan)
 [x] 20. Fixed search and filter in 1 row on mobile for Knowledge page
 [x] 21. Fixed category badge styling bug to display correct colors
+[x] 22. Added image upload feature to Knowledge with Cloudinary integration
+[x] 23. Created cloudinary_service.py for image upload/delete operations
+[x] 24. Updated Knowledge form to support image upload with preview
+[x] 25. Updated chatbot to return images in response when available in knowledge
+[x] 26. Updated chatbot testing page to render images in chat messages

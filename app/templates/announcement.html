@@ -13,28 +13,34 @@
         </button>
     </div>
 
-    <div id="announcementsList" style="margin-bottom: 24px;">
-        <div style="text-align: center; padding: 40px; color: #a0aec0;">
+    <div id="announcementsList" style="margin-bottom: 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+        <div style="text-align: center; padding: 40px; color: #a0aec0; grid-column: 1 / -1;">
             <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
             <p>Memuat pengumuman...</p>
         </div>
     </div>
+</div>
 
-    <div id="announcementFormContainer" style="display: none;">
-        <div style="background-color: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 24px;">
+<!-- Modal for Add/Edit Announcement -->
+<div id="announcementModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
             <h3 id="formTitle">Buat Pengumuman Baru</h3>
+            <span class="close" onclick="hideModal()">&times;</span>
+        </div>
+        <div class="modal-body">
             <form id="announcementForm">
                 <input type="hidden" id="editingId" value="">
                 <div class="form-group">
-                    <label for="title">Judul</label>
+                    <label for="title">Judul *</label>
                     <input type="text" class="form-control" id="title" required placeholder="Masukkan judul pengumuman">
                 </div>
                 <div class="form-group">
-                    <label for="message">Pesan</label>
+                    <label for="message">Pesan *</label>
                     <textarea class="form-control" id="message" required rows="6" placeholder="Masukkan isi pengumuman"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="category">Kategori</label>
+                    <label for="category">Kategori *</label>
                     <select class="form-control" id="category" required>
                         <option value="Umum">Umum</option>
                         <option value="Penting">Penting</option>
@@ -43,46 +49,108 @@
                         <option value="Peraturan">Peraturan</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 12px;">
-                    <button type="submit" class="btn btn-primary">
-                        <span id="saveButtonText">Simpan Pengumuman</span>
-                        <span id="saveButtonLoading" style="display: none;">
-                            <i class="fas fa-spinner fa-spin"></i> Menyimpan...
-                        </span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="cancelForm()">Batal</button>
-                </div>
             </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn" onclick="hideModal()">Batal</button>
+            <button type="submit" form="announcementForm" class="btn btn-primary">
+                <span id="saveButtonText">Simpan Pengumuman</span>
+                <span id="saveButtonLoading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Menyimpan...
+                </span>
+            </button>
         </div>
     </div>
 </div>
 
 <style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: #1a1f2e;
+    margin: 5% auto;
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #2d3748;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.25rem;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #2d3748;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.close {
+    color: #a0aec0;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+}
+
 .announcement-card {
     background-color: #1a1f2e;
     border: 1px solid #2d3748;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 20px;
-    margin-bottom: 16px;
 }
 
 .announcement-card h4 {
     color: #fff;
-    margin-bottom: 12px;
-    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .announcement-card p {
     color: #a0aec0;
     line-height: 1.6;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     white-space: pre-wrap;
 }
 
 .announcement-card .meta {
     color: #718096;
-    font-size: 0.875rem;
-    margin-bottom: 12px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
 }
 
 .announcement-card .actions {
@@ -91,36 +159,36 @@
 }
 
 .btn-secondary {
-    background-color: #4a5568;
+    background-color: #2d3748;
     color: #fff;
-    border: none;
+    border: 1px solid #4a5568;
 }
 
 .btn-secondary:hover {
-    background-color: #2d3748;
+    background-color: #374151;
 }
 
 .btn-danger {
-    background-color: #e53e3e;
+    background-color: #dc2626;
     color: #fff;
-    border: none;
+    border: 1px solid #dc2626;
 }
 
 .btn-danger:hover {
-    background-color: #c53030;
+    background-color: #b91c1c;
 }
 
 .btn-sm {
-    padding: 6px 12px;
+    padding: 8px 14px;
     font-size: 0.875rem;
 }
 
 .category-badge {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
     font-size: 0.75rem;
-    font-weight: bold;
+    font-weight: 500;
     margin-bottom: 8px;
 }
 
@@ -147,6 +215,20 @@
 .category-peraturan {
     background-color: #d69e2e;
     color: #fff;
+}
+
+@media (max-width: 768px) {
+    #announcementsList {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .announcement-card .actions {
+        flex-direction: column;
+    }
+    
+    .announcement-card .actions .btn {
+        width: 100%;
+    }
 }
 </style>
 
@@ -178,7 +260,7 @@ function displayAnnouncements(announcements) {
     
     if (announcements.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #a0aec0;">
+            <div style="text-align: center; padding: 40px; color: #a0aec0; grid-column: 1 / -1;">
                 <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px;"></i>
                 <p>Belum ada pengumuman. Klik "Buat Pengumuman Baru" untuk membuat yang pertama.</p>
             </div>
@@ -192,20 +274,22 @@ function displayAnnouncements(announcements) {
             month: 'long',
             year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            timeZone: 'Asia/Jakarta'
         });
         
         const category = announcement.category || 'Umum';
         const categoryClass = 'category-' + category.toLowerCase();
+        const borderColor = getCategoryBorderColor(category);
         
         return `
             <div class="announcement-card">
                 <div class="category-badge ${categoryClass}">${category}</div>
                 <h4>${escapeHtml(announcement.title)}</h4>
                 <p>${escapeHtml(announcement.message)}</p>
-                <div class="meta">Dibuat: ${createdDate}</div>
+                <div class="meta">${createdDate}</div>
                 <div class="actions">
-                    <button class="btn btn-primary btn-sm" onclick="editAnnouncement('${announcement.id}')">
+                    <button class="btn btn-secondary btn-sm" onclick="editAnnouncement('${announcement.id}')">
                         <i class="fas fa-edit"></i> Edit
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement('${announcement.id}', '${escapeHtml(announcement.title)}')">
@@ -215,6 +299,17 @@ function displayAnnouncements(announcements) {
             </div>
         `;
     }).join('');
+}
+
+function getCategoryBorderColor(category) {
+    const colors = {
+        'Penting': '#e53e3e',
+        'Akademik': '#3182ce',
+        'Umum': '#718096',
+        'Info': '#38b2ac',
+        'Peraturan': '#d69e2e'
+    };
+    return colors[category] || '#3182ce';
 }
 
 function escapeHtml(text) {
@@ -230,8 +325,14 @@ function showAddForm() {
     document.getElementById('message').value = '';
     document.getElementById('category').value = 'Umum';
     document.getElementById('saveButtonText').textContent = 'Simpan Pengumuman';
-    document.getElementById('announcementFormContainer').style.display = 'block';
-    document.getElementById('title').focus();
+    document.getElementById('announcementModal').style.display = 'block';
+    setTimeout(() => document.getElementById('title').focus(), 100);
+}
+
+function hideModal() {
+    document.getElementById('announcementModal').style.display = 'none';
+    document.getElementById('announcementForm').reset();
+    document.getElementById('editingId').value = '';
 }
 
 function editAnnouncement(id) {
@@ -245,8 +346,8 @@ function editAnnouncement(id) {
                 document.getElementById('message').value = data.data.message;
                 document.getElementById('category').value = data.data.category || 'Umum';
                 document.getElementById('saveButtonText').textContent = 'Update Pengumuman';
-                document.getElementById('announcementFormContainer').style.display = 'block';
-                document.getElementById('title').focus();
+                document.getElementById('announcementModal').style.display = 'block';
+                setTimeout(() => document.getElementById('title').focus(), 100);
             } else {
                 showError('Gagal memuat data pengumuman');
             }
@@ -255,12 +356,6 @@ function editAnnouncement(id) {
             console.error('Error:', error);
             showError('Terjadi kesalahan');
         });
-}
-
-function cancelForm() {
-    document.getElementById('announcementFormContainer').style.display = 'none';
-    document.getElementById('announcementForm').reset();
-    document.getElementById('editingId').value = '';
 }
 
 function deleteAnnouncement(id, title) {
@@ -370,7 +465,7 @@ document.getElementById('announcementForm').addEventListener('submit', function(
         if (data.success) {
             const message = editingId ? 'Pengumuman berhasil diupdate!' : 'Pengumuman berhasil dibuat!';
             showSuccess(message);
-            cancelForm();
+            hideModal();
             loadAnnouncements();
         } else {
             showError('Gagal menyimpan pengumuman: ' + data.error);
@@ -380,6 +475,21 @@ document.getElementById('announcementForm').addEventListener('submit', function(
         resetSaveButton();
         showError('Terjadi kesalahan: ' + error.message);
     });
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('announcementModal');
+    if (event.target === modal) {
+        hideModal();
+    }
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('announcementModal').style.display === 'block') {
+        hideModal();
+    }
 });
 </script>
 {% endblock %}

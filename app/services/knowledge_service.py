@@ -1,7 +1,10 @@
 from app.config.firebase_config import get_db
 from typing import List, Dict, Optional, Union
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# WIB Timezone (GMT+7)
+WIB = timezone(timedelta(hours=7))
 
 class KnowledgeService:
     def __init__(self):
@@ -192,8 +195,8 @@ class KnowledgeService:
                 'answer': answer,
                 'category': category,
                 'keywords': keywords,
-                'created_at': datetime.now().isoformat(),
-                'updated_at': datetime.now().isoformat()
+                'created_at': datetime.now(WIB).isoformat(),
+                'updated_at': datetime.now(WIB).isoformat()
             }
             
             if image_url:
@@ -227,7 +230,7 @@ class KnowledgeService:
                 'answer': answer,
                 'category': category,
                 'keywords': keywords,
-                'updated_at': datetime.now().isoformat()
+                'updated_at': datetime.now(WIB).isoformat()
             }
             
             # Handle image fields: None = no change, empty string = remove, value = update

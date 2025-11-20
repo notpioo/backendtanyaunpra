@@ -7,6 +7,7 @@ from app.routes.admin_routes import admin_bp
 from app.routes.chat_routes import chat_bp
 from app.routes.knowledge_routes import knowledge_bp
 from app.routes.announcement_routes import announcement_bp
+from app.routes.schedule_routes import schedule_bp
 from app.config.firebase_config import initialize_firebase
 
 # Load environment variables from .env file with priority
@@ -41,6 +42,7 @@ def create_app():
     app.register_blueprint(knowledge_bp, url_prefix='/api/knowledge')
     app.register_blueprint(admin_bp, url_prefix='/')
     app.register_blueprint(announcement_bp, url_prefix='/api/announcement')
+    app.register_blueprint(schedule_bp, url_prefix='/api/schedule')
 
     return app
 

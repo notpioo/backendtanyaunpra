@@ -58,12 +58,15 @@ def health_check():
         # Test Gemini service connectivity
         from app.services.gemini_service import gemini_service
         
+        from datetime import timezone, timedelta
+        WIB = timezone(timedelta(hours=7))
+        
         return jsonify({
             'success': True,
             'status': 'online',
             'service': 'academic-chatbot-api',
             'message': 'API is running successfully',
-            'timestamp': datetime.now().isoformat()
+            'timestamp': datetime.now(WIB).isoformat()
         }), 200
     except Exception as e:
         return jsonify({

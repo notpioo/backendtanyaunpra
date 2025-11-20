@@ -62,6 +62,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ url_for('admin.schedule') }}" class="{% if request.endpoint == 'admin.schedule' %}active{% endif %}" data-tooltip="Jadwal">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="menu-text">Jadwal</span>
+                    </a>
+                </li>
+                <li>
                     <a href="{{ url_for('admin.api_docs') }}" class="{% if request.endpoint == 'admin.api_docs' %}active{% endif %}" data-tooltip="API Docs">
                         <i class="fas fa-code"></i>
                         <span class="menu-text">API Docs</span>

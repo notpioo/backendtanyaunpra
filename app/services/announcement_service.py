@@ -1,7 +1,10 @@
 
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import uuid
 from app.config.firebase_config import get_db
+
+# WIB Timezone (GMT+7)
+WIB = timezone(timedelta(hours=7))
 
 class AnnouncementService:
     def __init__(self):
@@ -72,7 +75,7 @@ class AnnouncementService:
             announcements_ref = db_ref.child('announcements')
             
             announcement_id = str(uuid.uuid4())
-            now = datetime.now().isoformat()
+            now = datetime.now(WIB).isoformat()
             
             announcement_data = {
                 'title': title,
@@ -113,7 +116,7 @@ class AnnouncementService:
                 'title': title,
                 'message': message,
                 'category': category,
-                'updated_at': datetime.now().isoformat()
+                'updated_at': datetime.now(WIB).isoformat()
             }
             
             announcement_ref.update(update_data)

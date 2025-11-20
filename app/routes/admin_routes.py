@@ -78,6 +78,12 @@ def announcement():
     """Announcement management page"""
     return render_template('announcement.html')
 
+@admin_bp.route('/schedule')
+@login_required
+def schedule():
+    """Schedule management page"""
+    return render_template('schedule.html')
+
 @admin_bp.route('/api-docs')
 @login_required
 def api_docs():

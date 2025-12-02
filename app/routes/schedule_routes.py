@@ -76,18 +76,20 @@ def create_schedule():
             }), 400
 
         title = data.get('title', '').strip()
-        date = data.get('date', '').strip()
+        start_date = data.get('start_date', '').strip()
+        end_date = data.get('end_date', '').strip()
 
         # Validate required fields
-        if not title or not date:
+        if not title or not start_date:
             return jsonify({
                 'success': False,
-                'error': 'Title and date are required'
+                'error': 'Title and start_date are required'
             }), 400
 
         new_schedule = schedule_service.create_schedule(
             title=title,
-            date=date
+            start_date=start_date,
+            end_date=end_date if end_date else None
         )
 
         if new_schedule:
@@ -122,18 +124,20 @@ def update_schedule(schedule_id):
             }), 400
 
         title = data.get('title', '').strip()
-        date = data.get('date', '').strip()
+        start_date = data.get('start_date', '').strip()
+        end_date = data.get('end_date', '').strip()
 
-        if not title or not date:
+        if not title or not start_date:
             return jsonify({
                 'success': False,
-                'error': 'Title and date are required'
+                'error': 'Title and start_date are required'
             }), 400
 
         success = schedule_service.update_schedule(
             schedule_id=schedule_id,
             title=title,
-            date=date
+            start_date=start_date,
+            end_date=end_date if end_date else None
         )
 
         if success:

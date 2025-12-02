@@ -1,141 +1,902 @@
 
 {% extends "base.html" %}
 
-{% block title %}API Documentation - Chatbot Admin{% endblock %}
-{% block page_title %}API Documentation{% endblock %}
+{% block title %}Dokumentasi API - Chatbot Admin{% endblock %}
+{% block page_title %}Dokumentasi API{% endblock %}
 
 {% block content %}
-<div class="announcement-section">
-    <h2>Chatbot API Endpoints</h2>
+<style>
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+.api-docs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Base URL Section - Simple & Clean */
+.base-url-section {
+    background: #1a1f2e;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 32px;
+    border: 1px solid #2d3748;
+}
+
+.base-url-section h2 {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.base-url-section p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.base-url-box {
+    background: #0f1419;
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid #2d3748;
+}
+
+.base-url-text {
+    color: #3b82f6;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    word-break: break-all;
+}
+
+.copy-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.copy-btn:hover {
+    background: #2563eb;
+}
+
+/* Category Section */
+.category-section {
+    margin-bottom: 40px;
+}
+
+.category-header {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #2d3748;
+}
+
+/* API Card - Minimalist */
+.api-card {
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+}
+
+.api-card:hover {
+    border-color: #3b82f6;
+}
+
+/* Header */
+.api-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.method-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.method-get { background: #10b981; color: white; }
+.method-post { background: #3b82f6; color: white; }
+.method-put { background: #f59e0b; color: white; }
+.method-delete { background: #ef4444; color: white; }
+
+.endpoint-path {
+    font-family: 'Courier New', monospace;
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.badge-admin {
+    background: #2d3748;
+    color: #94a3b8;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Description */
+.api-description {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+/* Section Title */
+.section-title {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Code Block - Clean */
+.code-block {
+    background: #0f1419;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 8px 0 16px 0;
+    overflow-x: auto;
+    border: 1px solid #2d3748;
+}
+
+.code-block pre {
+    margin: 0;
+    color: #10b981;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Query Parameters */
+.param-list {
+    margin: 8px 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.param-item {
+    background: #0f1419;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #94a3b8;
+    border: 1px solid #2d3748;
+}
+
+.param-name {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+/* Info Section */
+.info-section {
+    background: #1a1f2e;
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 40px;
+    border: 1px solid #2d3748;
+}
+
+.info-section h3 {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.info-section ul {
+    color: #94a3b8;
+    line-height: 2;
+    margin-left: 20px;
+}
+
+.info-section strong {
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .api-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
     
-    <!-- Base URL Information -->
-    <div style="margin-bottom: 30px; padding: 20px; background-color: #1a202c; border-radius: 8px; border-left: 4px solid #3182ce;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">🌐 Base URL</h3>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0; font-size: 16px;">
-            <span id="base-url">Loading...</span>
+    .base-url-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .copy-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="api-docs-container">
+    <!-- Base URL -->
+    <div class="base-url-section">
+        <h2>Base URL</h2>
+        <p>URL dasar untuk semua endpoint API</p>
+        <div class="base-url-box">
+            <span class="base-url-text" id="base-url">Loading...</span>
+            <button class="copy-btn" onclick="copyBaseUrl()">
+                <i class="fas fa-copy"></i> Salin
+            </button>
         </div>
-        <p class="announcement-content" style="margin-top: 10px; color: #a0aec0;">
-            Base URL will be automatically detected based on your environment (Replit hosting or localhost).
-        </p>
     </div>
-    
-    <div style="margin-bottom: 30px;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">📤 POST /api/chat/message</h3>
-        <p class="announcement-content">Send a message to the chatbot and get AI response.</p>
+
+    <!-- Chat API -->
+    <div class="category-section">
+        <h2 class="category-header">💬 Chat API</h2>
         
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
-{
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-post">POST</span>
+                <span class="endpoint-path">/api/chat/message</span>
+            </div>
+            <p class="api-description">
+                Kirim pesan ke chatbot dan dapatkan respons AI menggunakan Gemini
+            </p>
+            
+            <div class="section-title">Request Body</div>
+            <div class="code-block">
+                <pre>{
   "message": "Apa itu sistem kredit semester?"
-}
+}</pre>
+            </div>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "respons": "Sistem Kredit Semester (SKS) adalah...",
+  "sumber": "gemini-ai",
+  "waktu": "2025-01-20T10:30:00+07:00"
+}</pre>
+            </div>
         </div>
-        
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
-{
-  "success": true,
-  "response": "Sistem Kredit Semester (SKS) adalah...",
-  "source": "gemini-ai"
-}
-        </div>
-    </div>
-    
-    <div style="margin-bottom: 30px;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">📋 GET /api/knowledge/</h3>
-        <p class="announcement-content">Get all knowledge entries from database.</p>
-        
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
-{
-  "success": true,
-  "data": [...],
-  "total": 10
-}
-        </div>
-    </div>
-    
-    <div style="margin-bottom: 30px;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">➕ POST /api/knowledge/</h3>
-        <p class="announcement-content">Add new knowledge entry to database.</p>
-        
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
-{
-  "question": "Apa itu KRS?",
-  "answer": "KRS adalah Kartu Rencana Studi...",
-  "category": "akademik",
-  "keywords": "krs, kartu, studi"
-}
-        </div>
-    </div>
-    
-    <div style="margin-bottom: 30px;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">✏️ PUT /api/knowledge/&lt;id&gt;</h3>
-        <p class="announcement-content">Update existing knowledge entry.</p>
-        
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
-{
-  "question": "Updated question",
-  "answer": "Updated answer",
-  "category": "updated_category",
-  "keywords": "updated keywords"
-}
-        </div>
-    </div>
-    
-    <div style="margin-bottom: 30px;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">🗑️ DELETE /api/knowledge/&lt;id&gt;</h3>
-        <p class="announcement-content">Delete knowledge entry from database.</p>
-    </div>
-    
-    <div style="margin-bottom: 30px;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">📢 GET /api/announcement/</h3>
-        <p class="announcement-content">Get current announcement data.</p>
-        
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
-{
-  "success": true,
-  "data": {
-    "title": "Announcement Title",
-    "message": "Announcement message",
-    "updated_at": "2025-01-15 10:30:00"
-  }
-}
-        </div>
-    </div>
-    
-    <div style="margin-bottom: 30px;">
-        <h3 style="color: #3182ce; margin-bottom: 10px;">🔄 POST /api/announcement/</h3>
-        <p class="announcement-content">Update announcement data.</p>
-        
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Request Body:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace; margin: 10px 0;">
-{
-  "title": "New Announcement",
-  "message": "This is the new announcement message"
-}
-        </div>
-    </div>
-    
-    <div>
-        <h3 style="color: #3182ce; margin-bottom: 10px;">❤️ GET /api/chat/health</h3>
-        <p class="announcement-content">Check API health status.</p>
-        
-        <h4 style="color: #3182ce; margin: 15px 0 5px 0;">Response:</h4>
-        <div class="form-control" style="background-color: #0f1419; color: #3182ce; font-family: monospace;">
-{
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/chat/health</span>
+            </div>
+            <p class="api-description">
+                Cek status kesehatan API dan konektivitas service
+            </p>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
   "status": "online",
-  "service": "chatbot-api",
-  "message": "API is running successfully"
-}
+  "service": "academic-chatbot-api",
+  "pesan": "API berjalan dengan baik",
+  "waktu": "2025-01-20T10:30:00+07:00"
+}</pre>
+            </div>
         </div>
+    </div>
+
+    <!-- Knowledge API -->
+    <div class="category-section">
+        <h2 class="category-header">📚 Knowledge API</h2>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/knowledge/</span>
+            </div>
+            <p class="api-description">
+                Ambil semua data pengetahuan dari database
+            </p>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": [
+    {
+      "id": "doc123",
+      "pertanyaan": "Apa itu KRS?",
+      "jawaban": "KRS adalah Kartu Rencana Studi...",
+      "kategori": "akademik",
+      "kata_kunci": "krs, kartu, studi",
+      "url_gambar": "https://...",
+      "dibuat_pada": "2025-01-15 10:30:00"
+    }
+  ],
+  "total": 10
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/knowledge/&lt;id&gt;</span>
+            </div>
+            <p class="api-description">
+                Ambil detail pengetahuan berdasarkan ID
+            </p>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pengetahuan": {
+    "id": "doc123",
+    "pertanyaan": "Apa itu KRS?",
+    "jawaban": "KRS adalah Kartu Rencana Studi...",
+    "kategori": "akademik",
+    "kata_kunci": "krs, kartu, studi",
+    "url_gambar": "https://..."
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-post">POST</span>
+                <span class="endpoint-path">/api/knowledge/</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Tambahkan pengetahuan baru (dengan atau tanpa gambar)
+            </p>
+            
+            <div class="section-title">Request Body (JSON)</div>
+            <div class="code-block">
+                <pre>{
+  "pertanyaan": "Apa itu KRS?",
+  "jawaban": "KRS adalah Kartu Rencana Studi...",
+  "kategori": "akademik",
+  "kata_kunci": "krs, kartu, studi"
+}</pre>
+            </div>
+
+            <div class="section-title">Request Body (Form Data dengan Gambar)</div>
+            <div class="code-block">
+                <pre>pertanyaan: "Apa itu KRS?"
+jawaban: "KRS adalah..."
+kategori: "akademik"
+kata_kunci: "krs, kartu"
+image: [file]</pre>
+            </div>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pesan": "Pengetahuan berhasil ditambahkan"
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-put">PUT</span>
+                <span class="endpoint-path">/api/knowledge/&lt;id&gt;</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Perbarui pengetahuan yang sudah ada
+            </p>
+            
+            <div class="section-title">Request Body</div>
+            <div class="code-block">
+                <pre>{
+  "pertanyaan": "Pertanyaan yang diperbarui",
+  "jawaban": "Jawaban yang diperbarui",
+  "kategori": "kategori_baru",
+  "kata_kunci": "kata kunci baru",
+  "hapus_gambar": false
+}</pre>
+            </div>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pesan": "Pengetahuan berhasil diperbarui"
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-delete">DELETE</span>
+                <span class="endpoint-path">/api/knowledge/&lt;id&gt;</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Hapus pengetahuan dari database berdasarkan ID
+            </p>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pesan": "Pengetahuan berhasil dihapus"
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/knowledge/stats</span>
+            </div>
+            <p class="api-description">
+                Ambil statistik pengetahuan
+            </p>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": {
+    "total_pengetahuan": 150,
+    "kategori": {
+      "akademik": 50,
+      "umum": 30
+    }
+  }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement API -->
+    <div class="category-section">
+        <h2 class="category-header">📢 Announcement API</h2>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/announcement/</span>
+            </div>
+            <p class="api-description">
+                Ambil semua pengumuman
+            </p>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": [
+    {
+      "id": "ann123",
+      "judul": "Pengumuman Penting",
+      "pesan": "Ini adalah pengumuman...",
+      "kategori": "Penting",
+      "dibuat_pada": "2025-01-20 10:30:00",
+      "diperbarui_pada": "2025-01-20 10:30:00"
+    }
+  ]
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/announcement/&lt;id&gt;</span>
+            </div>
+            <p class="api-description">
+                Ambil pengumuman berdasarkan ID
+            </p>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": {
+    "id": "ann123",
+    "judul": "Pengumuman Penting",
+    "pesan": "Ini adalah pengumuman...",
+    "kategori": "Penting"
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-post">POST</span>
+                <span class="endpoint-path">/api/announcement/</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Buat pengumuman baru
+            </p>
+            
+            <div class="section-title">Request Body</div>
+            <div class="code-block">
+                <pre>{
+  "judul": "Pengumuman Baru",
+  "pesan": "Ini adalah pesan pengumuman",
+  "kategori": "Penting"
+}</pre>
+            </div>
+
+            <div class="section-title">Kategori yang Diizinkan</div>
+            <ul class="param-list">
+                <li class="param-item">Penting, Akademik, Umum, Info, Peraturan</li>
+            </ul>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pesan": "Pengumuman berhasil dibuat",
+  "data": { "id": "ann123", ... }
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-put">PUT</span>
+                <span class="endpoint-path">/api/announcement/&lt;id&gt;</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Perbarui pengumuman yang sudah ada
+            </p>
+            
+            <div class="section-title">Request Body</div>
+            <div class="code-block">
+                <pre>{
+  "judul": "Judul Diperbarui",
+  "pesan": "Pesan yang diperbarui",
+  "kategori": "Akademik"
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-delete">DELETE</span>
+                <span class="endpoint-path">/api/announcement/&lt;id&gt;</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Hapus pengumuman berdasarkan ID
+            </p>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pesan": "Pengumuman berhasil dihapus"
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule API -->
+    <div class="category-section">
+        <h2 class="category-header">📅 Schedule API</h2>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/schedule/</span>
+            </div>
+            <p class="api-description">
+                Ambil semua jadwal acara akademik
+            </p>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": [
+    {
+      "id": "sch123",
+      "judul": "Ujian Tengah Semester",
+      "tanggal_mulai": "2025-02-01",
+      "tanggal_selesai": "2025-02-08",
+      "dibuat_pada": "2025-01-20 10:30:00",
+      "diperbarui_pada": "2025-01-20 10:30:00"
+    }
+  ]
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/schedule/range</span>
+            </div>
+            <p class="api-description">
+                Ambil jadwal berdasarkan rentang tanggal tertentu
+            </p>
+            
+            <div class="section-title">Query Parameters</div>
+            <ul class="param-list">
+                <li class="param-item"><span class="param-name">start_date</span> - Tanggal mulai (YYYY-MM-DD)</li>
+                <li class="param-item"><span class="param-name">end_date</span> - Tanggal selesai (YYYY-MM-DD)</li>
+            </ul>
+
+            <div class="section-title">Contoh Request</div>
+            <div class="code-block">
+                <pre>GET /api/schedule/range?start_date=2025-02-01&end_date=2025-02-28</pre>
+            </div>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": [...]
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/schedule/&lt;id&gt;</span>
+            </div>
+            <p class="api-description">
+                Ambil detail jadwal berdasarkan ID
+            </p>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": {
+    "id": "sch123",
+    "judul": "Ujian Tengah Semester",
+    "tanggal_mulai": "2025-02-01",
+    "tanggal_selesai": "2025-02-08"
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-post">POST</span>
+                <span class="endpoint-path">/api/schedule/</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Tambahkan jadwal acara baru
+            </p>
+            
+            <div class="section-title">Request Body</div>
+            <div class="code-block">
+                <pre>{
+  "judul": "Ujian Tengah Semester",
+  "tanggal_mulai": "2025-02-01",
+  "tanggal_selesai": "2025-02-08"
+}</pre>
+            </div>
+
+            <div class="section-title">Catatan</div>
+            <ul class="param-list">
+                <li class="param-item">Jika tanggal_selesai tidak diisi, akan otomatis sama dengan tanggal_mulai</li>
+            </ul>
+            
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pesan": "Jadwal berhasil dibuat",
+  "data": { "id": "sch123", ... }
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-put">PUT</span>
+                <span class="endpoint-path">/api/schedule/&lt;id&gt;</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Perbarui jadwal yang sudah ada
+            </p>
+            
+            <div class="section-title">Request Body</div>
+            <div class="code-block">
+                <pre>{
+  "judul": "Judul Diperbarui",
+  "tanggal_mulai": "2025-02-01",
+  "tanggal_selesai": "2025-02-10"
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-delete">DELETE</span>
+                <span class="endpoint-path">/api/schedule/&lt;id&gt;</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Hapus jadwal berdasarkan ID
+            </p>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "pesan": "Jadwal berhasil dihapus"
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/schedule/stats</span>
+            </div>
+            <p class="api-description">
+                Ambil statistik jadwal
+            </p>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": {
+    "total_jadwal": 25,
+    "akan_datang": 10,
+    "lampau": 15,
+    "bulan_ini": 5
+  }
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics API -->
+    <div class="category-section">
+        <h2 class="category-header">📊 Analytics API</h2>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/analytics/stats</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Ambil statistik global analytics
+            </p>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": {
+    "total_permintaan": 1500,
+    "total_error": 25,
+    "tingkat_error": 1.67,
+    "terakhir_diperbarui": "2025-01-20T10:30:00+07:00"
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/analytics/daily</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Ambil statistik harian berdasarkan tanggal
+            </p>
+            
+            <div class="section-title">Query Parameters</div>
+            <ul class="param-list">
+                <li class="param-item"><span class="param-name">date</span> - Tanggal (YYYY-MM-DD), opsional (default: hari ini)</li>
+            </ul>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": {
+    "tanggal": "2025-01-20",
+    "endpoints": [...],
+    "total_permintaan": 150,
+    "total_error": 5
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge method-get">GET</span>
+                <span class="endpoint-path">/api/analytics/realtime</span>
+                <span class="badge-admin">Admin</span>
+            </div>
+            <p class="api-description">
+                Ambil log request realtime
+            </p>
+            
+            <div class="section-title">Query Parameters</div>
+            <ul class="param-list">
+                <li class="param-item"><span class="param-name">limit</span> - Jumlah log (default: 100)</li>
+            </ul>
+
+            <div class="section-title">Response</div>
+            <div class="code-block">
+                <pre>{
+  "sukses": true,
+  "data": [
+    {
+      "id": "abc123",
+      "endpoint": "/api/chat/message",
+      "method": "POST",
+      "status_code": 200,
+      "waktu_respons": 0.234,
+      "waktu": "2025-01-20T10:30:00+07:00"
+    }
+  ]
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+        <h3>ℹ️ Informasi Penting</h3>
+        <ul>
+            <li>Semua request dan response menggunakan format <strong>JSON</strong></li>
+            <li>Endpoint dengan badge <strong>ADMIN</strong> memerlukan autentikasi admin</li>
+            <li>Timestamp menggunakan timezone <strong>WIB (UTC+7)</strong></li>
+            <li>Semua field dalam response menggunakan <strong>bahasa Indonesia</strong></li>
+            <li>Untuk testing API, gunakan halaman <strong>Chatbot Testing</strong> atau tools seperti Postman</li>
+            <li>Upload gambar menggunakan <strong>multipart/form-data</strong>, bukan JSON</li>
+        </ul>
     </div>
 </div>
 
 <script>
-// Auto-detect and display base URL
 document.addEventListener('DOMContentLoaded', function() {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
@@ -143,38 +904,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let baseUrl;
     
-    // Check if running on Replit
     if (hostname.includes('replit.dev') || hostname.includes('replit.app') || hostname.includes('replit.co')) {
         baseUrl = `${protocol}//${hostname}`;
-    } 
-    // Check if running on localhost
-    else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
         baseUrl = port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
-    }
-    // Other hosting environments
-    else {
+    } else {
         baseUrl = port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
     }
     
     document.getElementById('base-url').textContent = baseUrl;
-    
-    // Add copy button functionality
-    const baseUrlElement = document.getElementById('base-url');
-    baseUrlElement.style.cursor = 'pointer';
-    baseUrlElement.title = 'Click to copy';
-    
-    baseUrlElement.addEventListener('click', function() {
-        navigator.clipboard.writeText(baseUrl).then(function() {
-            const originalText = baseUrlElement.textContent;
-            baseUrlElement.textContent = 'Copied!';
-            baseUrlElement.style.color = '#3182ce';
-            
-            setTimeout(function() {
-                baseUrlElement.textContent = originalText;
-                baseUrlElement.style.color = '#3182ce';
-            }, 1000);
-        });
-    });
 });
+
+function copyBaseUrl() {
+    const baseUrl = document.getElementById('base-url').textContent;
+    navigator.clipboard.writeText(baseUrl).then(function() {
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
+        btn.style.background = '#10b981';
+        
+        setTimeout(function() {
+            btn.innerHTML = originalHTML;
+            btn.style.background = '#3b82f6';
+        }, 2000);
+    });
+}
 </script>
 {% endblock %}

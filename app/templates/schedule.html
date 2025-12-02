@@ -1,4 +1,5 @@
 
+
 {% extends "base.html" %}
 
 {% block title %}Jadwal Kalender - Chatbot Admin{% endblock %}
@@ -36,8 +37,8 @@
         </div>
     </div>
 
-    <div id="schedulesList" style="margin-bottom: 24px;">
-        <div style="text-align: center; padding: 40px; color: #a0aec0;">
+    <div id="schedulesList" style="margin-bottom: 24px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div style="text-align: center; padding: 40px; color: #a0aec0; grid-column: 1 / -1;">
             <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
             <p>Memuat jadwal...</p>
         </div>
@@ -61,8 +62,16 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="date">Tanggal *</label>
-                    <input type="date" class="form-control" id="date" required>
+                    <label for="startDate">Tanggal Mulai *</label>
+                    <input type="date" class="form-control" id="startDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">Tanggal Selesai (opsional)</label>
+                    <input type="date" class="form-control" id="endDate">
+                    <small style="color: #a0aec0; font-size: 0.85rem; margin-top: 4px; display: block;">
+                        Kosongkan jika acara hanya 1 hari
+                    </small>
                 </div>
             </form>
         </div>
@@ -79,39 +88,51 @@
 <style>
 .schedule-card {
     background-color: #1a1f2e;
-    border-left: 4px solid #3182ce;
-    border-radius: 12px;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
     padding: 20px;
-    margin-bottom: 16px;
     transition: all 0.2s ease;
 }
 
 .schedule-card:hover {
-    transform: translateX(5px);
+    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .schedule-card h4 {
     color: #fff;
-    margin-bottom: 8px;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
-.schedule-card .schedule-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+.schedule-card .schedule-date {
     color: #a0aec0;
     font-size: 0.875rem;
     margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.schedule-card .schedule-meta i {
-    margin-right: 6px;
+.schedule-card .schedule-date i {
     color: #3182ce;
+}
+
+.schedule-card .date-badge {
+    display: inline-block;
+    background-color: #2d3748;
+    color: #3182ce;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.schedule-card .date-badge.multi-day {
+    background-color: #3182ce;
+    color: #fff;
 }
 
 .schedule-card .actions {
@@ -120,27 +141,27 @@
 }
 
 .btn-secondary {
-    background-color: #4a5568;
+    background-color: #2d3748;
     color: #fff;
-    border: none;
+    border: 1px solid #4a5568;
 }
 
 .btn-secondary:hover {
-    background-color: #2d3748;
+    background-color: #374151;
 }
 
 .btn-danger {
-    background-color: #e53e3e;
+    background-color: #dc2626;
     color: #fff;
-    border: none;
+    border: 1px solid #dc2626;
 }
 
 .btn-danger:hover {
-    background-color: #c53030;
+    background-color: #b91c1c;
 }
 
 .btn-sm {
-    padding: 6px 12px;
+    padding: 8px 14px;
     font-size: 0.875rem;
 }
 
@@ -183,7 +204,8 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     animation: fadeIn 0.3s ease;
 }
 
@@ -193,7 +215,7 @@
 }
 
 .modal-content {
-    background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 100%);
+    background-color: #1a1f2e;
     margin: 5% auto;
     padding: 0;
     border: 1px solid #2d3748;
@@ -276,10 +298,15 @@
     to { transform: rotate(360deg); }
 }
 
+@media (max-width: 1024px) {
+    #schedulesList {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
 @media (max-width: 768px) {
-    .schedule-card .schedule-meta {
-        flex-direction: column;
-        gap: 8px;
+    #schedulesList {
+        grid-template-columns: 1fr !important;
     }
     
     .stats-search-container {
@@ -312,6 +339,14 @@
     }
 
     .modal-footer .btn {
+        width: 100%;
+    }
+    
+    .schedule-card .actions {
+        flex-direction: column;
+    }
+    
+    .schedule-card .actions .btn {
         width: 100%;
     }
 }
@@ -348,15 +383,10 @@ function searchSchedules() {
     
     const filtered = allSchedulesData.filter(schedule => {
         const title = schedule.title.toLowerCase();
-        const date = new Date(schedule.date + 'T00:00:00+07:00').toLocaleDateString('id-ID', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            timeZone: 'Asia/Jakarta'
-        }).toLowerCase();
+        const startDate = formatDateRange(schedule.start_date, schedule.end_date).toLowerCase();
         
-        return title.includes(searchTerm) || date.includes(searchTerm) || schedule.date.includes(searchTerm);
+        return title.includes(searchTerm) || startDate.includes(searchTerm) || 
+               schedule.start_date.includes(searchTerm) || schedule.end_date.includes(searchTerm);
     });
     
     displaySchedules(filtered);
@@ -379,12 +409,40 @@ function loadSchedules() {
         });
 }
 
+function formatDateRange(startDate, endDate) {
+    const start = new Date(startDate + 'T00:00:00+07:00');
+    const end = new Date(endDate + 'T00:00:00+07:00');
+    
+    const options = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'Asia/Jakarta'
+    };
+    
+    if (startDate === endDate) {
+        return start.toLocaleDateString('id-ID', options);
+    } else {
+        const startFormatted = start.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', timeZone: 'Asia/Jakarta' });
+        const endFormatted = end.toLocaleDateString('id-ID', options);
+        return `${startFormatted} - ${endFormatted}`;
+    }
+}
+
+function getDaysDifference(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays + 1; // +1 to include both start and end date
+}
+
 function displaySchedules(schedules) {
     const container = document.getElementById('schedulesList');
 
     if (schedules.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #a0aec0;">
+            <div style="text-align: center; padding: 40px; color: #a0aec0; grid-column: 1 / -1;">
                 <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 16px;"></i>
                 <p>Belum ada jadwal. Klik "Buat Jadwal Baru" untuk membuat yang pertama.</p>
             </div>
@@ -393,31 +451,26 @@ function displaySchedules(schedules) {
     }
 
     container.innerHTML = schedules.map(schedule => {
-        const scheduleDate = new Date(schedule.date + 'T00:00:00+07:00');
-        const formattedDate = scheduleDate.toLocaleDateString('id-ID', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            timeZone: 'Asia/Jakarta'
-        });
+        const dateRange = formatDateRange(schedule.start_date, schedule.end_date);
+        const isMultiDay = schedule.start_date !== schedule.end_date;
+        const days = getDaysDifference(schedule.start_date, schedule.end_date);
 
         const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
-        const isPast = schedule.date < today;
-        const borderColor = isPast ? '#4a5568' : '#3182ce';
+        const isPast = schedule.end_date < today;
 
         return `
-            <div class="schedule-card" style="border-left-color: ${borderColor}; ${isPast ? 'opacity: 0.7;' : ''}">
+            <div class="schedule-card" style="${isPast ? 'opacity: 0.7;' : ''}">
+                ${isMultiDay ? `<div class="date-badge multi-day">${days} Hari</div>` : '<div class="date-badge">1 Hari</div>'}
                 <h4>
-                    <i class="fas fa-calendar-day"></i>
                     ${escapeHtml(schedule.title)}
-                    ${isPast ? '<span style="color: #718096; font-size: 0.75rem; font-weight: normal;">(Selesai)</span>' : ''}
+                    ${isPast ? '<span style="color: #718096; font-size: 0.75rem; font-weight: normal;"> (Selesai)</span>' : ''}
                 </h4>
-                <div class="schedule-meta">
-                    <span><i class="fas fa-calendar"></i>${formattedDate}</span>
+                <div class="schedule-date">
+                    <i class="fas fa-calendar"></i>
+                    ${dateRange}
                 </div>
                 <div class="actions">
-                    <button class="btn btn-primary btn-sm" onclick="editSchedule('${schedule.id}')">
+                    <button class="btn btn-secondary btn-sm" onclick="editSchedule('${schedule.id}')">
                         <i class="fas fa-edit"></i> Edit
                     </button>
                     <button class="btn btn-danger btn-sm" onclick="deleteSchedule('${schedule.id}', '${escapeHtml(schedule.title)}')">
@@ -439,7 +492,8 @@ function showAddModal() {
     document.getElementById('modalTitle').textContent = 'Buat Jadwal Baru';
     document.getElementById('editingId').value = '';
     document.getElementById('scheduleForm').reset();
-    document.getElementById('date').valueAsDate = new Date();
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
     document.getElementById('saveButtonText').textContent = 'Simpan Jadwal';
     document.getElementById('scheduleModal').style.display = 'block';
     setTimeout(() => document.getElementById('title').focus(), 100);
@@ -459,7 +513,8 @@ function editSchedule(id) {
                 document.getElementById('modalTitle').textContent = 'Edit Jadwal';
                 document.getElementById('editingId').value = id;
                 document.getElementById('title').value = schedule.title;
-                document.getElementById('date').value = schedule.date;
+                document.getElementById('startDate').value = schedule.start_date;
+                document.getElementById('endDate').value = schedule.start_date !== schedule.end_date ? schedule.end_date : '';
                 document.getElementById('saveButtonText').textContent = 'Update Jadwal';
                 document.getElementById('scheduleModal').style.display = 'block';
                 setTimeout(() => document.getElementById('title').focus(), 100);
@@ -559,9 +614,13 @@ document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     showSaveLoading();
 
     const editingId = document.getElementById('editingId').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
     const formData = {
         title: document.getElementById('title').value,
-        date: document.getElementById('date').value
+        start_date: startDate,
+        end_date: endDate || startDate  // Use start_date if end_date is empty
     };
 
     const url = editingId ? `/api/schedule/${editingId}` : '/api/schedule/';

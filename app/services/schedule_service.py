@@ -25,17 +25,22 @@ class ScheduleService:
             if data:
                 schedules = []
                 for key, value in data.items():
+                    # Support both old (date) and new (start_date/end_date) format
+                    start_date = value.get('start_date') or value.get('date', '')
+                    end_date = value.get('end_date') or value.get('date', '')
+                    
                     schedule = {
                         'id': key,
                         'title': value.get('title', 'No Title'),
-                        'date': value.get('date', ''),
+                        'start_date': start_date,
+                        'end_date': end_date,
                         'created_at': value.get('created_at', ''),
                         'updated_at': value.get('updated_at', '')
                     }
                     schedules.append(schedule)
 
-                # Sort by date (newest first)
-                schedules.sort(key=lambda x: x.get('date', ''), reverse=True)
+                # Sort by start_date (newest first)
+                schedules.sort(key=lambda x: x.get('start_date', ''), reverse=True)
                 return schedules
             else:
                 return []
@@ -52,10 +57,15 @@ class ScheduleService:
             data = schedule_ref.get()
 
             if data:
+                # Support both old (date) and new (start_date/end_date) format
+                start_date = data.get('start_date') or data.get('date', '')
+                end_date = data.get('end_date') or data.get('date', '')
+                
                 return {
                     'id': schedule_id,
                     'title': data.get('title', 'No Title'),
-                    'date': data.get('date', ''),
+                    'start_date': start_date,
+                    'end_date': end_date,
                     'created_at': data.get('created_at', ''),
                     'updated_at': data.get('updated_at', '')
                 }
@@ -87,7 +97,7 @@ class ScheduleService:
             print(f"❌ Error filtering schedules by date range: {e}")
             return []
 
-    def create_schedule(self, title: str, date: str) -> dict:
+    def create_schedule(self, title: str, start_date: str, end_date: str = None) -> dict:
         """Create new schedule event"""
         try:
             db_ref = self.get_db_ref()
@@ -96,9 +106,14 @@ class ScheduleService:
             schedule_id = str(uuid.uuid4())
             now = datetime.now(WIB).isoformat()
 
+            # If end_date not provided, use start_date as end_date (single day event)
+            if not end_date:
+                end_date = start_date
+
             schedule_data = {
                 'title': title,
-                'date': date,
+                'start_date': start_date,
+                'end_date': end_date,
                 'created_at': now,
                 'updated_at': now
             }
@@ -115,7 +130,7 @@ class ScheduleService:
             print(f"❌ Error creating schedule: {e}")
             return None
 
-    def update_schedule(self, schedule_id: str, title: str, date: str) -> bool:
+    def update_schedule(self, schedule_id: str, title: str, start_date: str, end_date: str = None) -> bool:
         """Update existing schedule event"""
         try:
             db_ref = self.get_db_ref()
@@ -126,9 +141,14 @@ class ScheduleService:
                 print(f"❌ Schedule {schedule_id} not found")
                 return False
 
+            # If end_date not provided, use start_date as end_date (single day event)
+            if not end_date:
+                end_date = start_date
+
             update_data = {
                 'title': title,
-                'date': date,
+                'start_date': start_date,
+                'end_date': end_date,
                 'updated_at': datetime.now(WIB).isoformat()
             }
 
@@ -166,12 +186,12 @@ class ScheduleService:
 
             today = datetime.now(WIB).date().isoformat()
 
-            upcoming = [s for s in schedules if s.get('date', '') >= today]
-            past = [s for s in schedules if s.get('date', '') < today]
+            upcoming = [s for s in schedules if s.get('end_date', '') >= today]
+            past = [s for s in schedules if s.get('end_date', '') < today]
 
             # Get this month schedules
             current_month = datetime.now(WIB).strftime('%Y-%m')
-            this_month = [s for s in schedules if s.get('date', '').startswith(current_month)]
+            this_month = [s for s in schedules if s.get('start_date', '').startswith(current_month)]
 
             stats = {
                 'total_schedules': len(schedules),

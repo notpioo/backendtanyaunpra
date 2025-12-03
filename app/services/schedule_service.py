@@ -26,21 +26,21 @@ class ScheduleService:
                 schedules = []
                 for key, value in data.items():
                     # Support both old (date) and new (start_date/end_date) format
-                    start_date = value.get('start_date') or value.get('date', '')
-                    end_date = value.get('end_date') or value.get('date', '')
+                    start_date = value.get('tanggal_mulai') or value.get('start_date') or value.get('date', '')
+                    end_date = value.get('tanggal_selesai') or value.get('end_date') or value.get('date', '')
                     
                     schedule = {
                         'id': key,
-                        'title': value.get('title', 'No Title'),
-                        'start_date': start_date,
-                        'end_date': end_date,
-                        'created_at': value.get('created_at', ''),
-                        'updated_at': value.get('updated_at', '')
+                        'judul': value.get('judul') or value.get('title', 'No Title'),
+                        'tanggal_mulai': start_date,
+                        'tanggal_selesai': end_date,
+                        'dibuat_pada': value.get('dibuat_pada') or value.get('created_at', ''),
+                        'diperbarui_pada': value.get('diperbarui_pada') or value.get('updated_at', '')
                     }
                     schedules.append(schedule)
 
                 # Sort by start_date (newest first)
-                schedules.sort(key=lambda x: x.get('start_date', ''), reverse=True)
+                schedules.sort(key=lambda x: x.get('tanggal_mulai', ''), reverse=True)
                 return schedules
             else:
                 return []
@@ -58,16 +58,16 @@ class ScheduleService:
 
             if data:
                 # Support both old (date) and new (start_date/end_date) format
-                start_date = data.get('start_date') or data.get('date', '')
-                end_date = data.get('end_date') or data.get('date', '')
+                start_date = data.get('tanggal_mulai') or data.get('start_date') or data.get('date', '')
+                end_date = data.get('tanggal_selesai') or data.get('end_date') or data.get('date', '')
                 
                 return {
                     'id': schedule_id,
-                    'title': data.get('title', 'No Title'),
-                    'start_date': start_date,
-                    'end_date': end_date,
-                    'created_at': data.get('created_at', ''),
-                    'updated_at': data.get('updated_at', '')
+                    'judul': data.get('judul') or data.get('title', 'No Title'),
+                    'tanggal_mulai': start_date,
+                    'tanggal_selesai': end_date,
+                    'dibuat_pada': data.get('dibuat_pada') or data.get('created_at', ''),
+                    'diperbarui_pada': data.get('diperbarui_pada') or data.get('updated_at', '')
                 }
             else:
                 return None
@@ -86,11 +86,11 @@ class ScheduleService:
 
             filtered = [
                 s for s in all_schedules 
-                if start_date <= s.get('date', '') <= end_date
+                if start_date <= s.get('tanggal_mulai', '') <= end_date
             ]
 
             # Sort by date
-            filtered.sort(key=lambda x: x.get('date', ''))
+            filtered.sort(key=lambda x: x.get('tanggal_mulai', ''))
             return filtered
 
         except Exception as e:
@@ -104,18 +104,18 @@ class ScheduleService:
             schedules_ref = db_ref.child('schedules')
 
             schedule_id = str(uuid.uuid4())
-            now = datetime.now(WIB).isoformat()
+            now = datetime.now(WIB).strftime('%Y-%m-%d %H:%M:%S')
 
             # If end_date not provided, use start_date as end_date (single day event)
             if not end_date:
                 end_date = start_date
 
             schedule_data = {
-                'title': title,
-                'start_date': start_date,
-                'end_date': end_date,
-                'created_at': now,
-                'updated_at': now
+                'judul': title,
+                'tanggal_mulai': start_date,
+                'tanggal_selesai': end_date,
+                'dibuat_pada': now,
+                'diperbarui_pada': now
             }
 
             schedules_ref.child(schedule_id).set(schedule_data)
@@ -146,10 +146,10 @@ class ScheduleService:
                 end_date = start_date
 
             update_data = {
-                'title': title,
-                'start_date': start_date,
-                'end_date': end_date,
-                'updated_at': datetime.now(WIB).isoformat()
+                'judul': title,
+                'tanggal_mulai': start_date,
+                'tanggal_selesai': end_date,
+                'diperbarui_pada': datetime.now(WIB).strftime('%Y-%m-%d %H:%M:%S')
             }
 
             schedule_ref.update(update_data)
@@ -186,12 +186,12 @@ class ScheduleService:
 
             today = datetime.now(WIB).date().isoformat()
 
-            upcoming = [s for s in schedules if s.get('end_date', '') >= today]
-            past = [s for s in schedules if s.get('end_date', '') < today]
+            upcoming = [s for s in schedules if s.get('tanggal_selesai', '') >= today]
+            past = [s for s in schedules if s.get('tanggal_selesai', '') < today]
 
             # Get this month schedules
             current_month = datetime.now(WIB).strftime('%Y-%m')
-            this_month = [s for s in schedules if s.get('start_date', '').startswith(current_month)]
+            this_month = [s for s in schedules if s.get('tanggal_mulai', '').startswith(current_month)]
 
             stats = {
                 'total_schedules': len(schedules),
